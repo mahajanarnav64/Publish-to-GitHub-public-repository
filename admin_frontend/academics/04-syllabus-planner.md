@@ -16,13 +16,13 @@ The interface accommodates two distinct user groups:
 
 | Component Name | Description | State/Props |
 | :--- | :--- | :--- |
-| **Syllabus Plan List Table** | Displays existing syllabus plans with columns for Class, Subject, Progress, and Actions. | Sortable, Paginated, Loading State |
+| **Syllabus Plan List** | Hierarchical view showing subjects mapped to nested, collapsible chapters and topics. | Collapsed by default |
 | **Filter Bar (Admin)** | Dropdowns for Academic Session, Class, and Subject to filter the Plan List. | Selected Values, Disabled if loading |
 | **Create Plan Button** | Triggers the Syllabus Plan creation modal. | enabled, disabled |
 | **Chapter Input Form (Admin)** | Dynamic form to add/remove chapters, set names, and define planned durations. | Array of fields, Validation States |
-| **Teacher Timeline Cards** | Visual cards showing chapter names, planned dates, and status. | Pending, In-Progress, Completed, Overdue |
-| **Status Badge** | Color-coded indicators reflecting real-time chapter progress. | Grey, Blue, Green, Red |
-| **Action Toggles (Teacher)**| Buttons to transition a chapter from Not Started -> In Progress -> Complete. | Active/Inactive/Completed |
+| **Data Rows** | Compact horizontal UI components presenting duration, dates, and teachers in condensed pills (6px padding, 340px fixed width). | Master Chapter, Curriculum Topic |
+| **Actual Days Container** | Statically rendered badge to maintain structural alignment across all rows. | Shows actual days or "In Progress" placeholder |
+| **Merged Status Badge** | Color-coded indicators reflecting BOTH status and performance logic natively. | Blue = In Progress, Green = Completed (On Time), Red = Completed (Early/Delayed) |
 | **Early Feedback Modal** | Dialog prompting a teacher for reasoning when completing a chapter early. | Textarea Input, 1-5 Rating Component |
 
 ## 4. Layout Structure
@@ -30,7 +30,8 @@ The interface accommodates two distinct user groups:
 ### Admin Syllabus Planner List
 *   **Header**: Page Title, Breadcrumbs, "+ Create Syllabus Plan" CTA.
 *   **Filter Section**: Horizontal bar featuring Dropdowns: Session, Class, Subject.
-*   **Main Container**: Data table with columns: Class, Subject, Total Chapters, Total Planned Days, Progress (Progress Bar UI), and Actions (View, Edit, Delete).
+*   **Main Container**: Nested list format. High-level Master Chapters are presented as interactive rows. Clicking a chapter reveals nested Curriculum Topics. Chapters are collapsed by default to save initial query space.
+*   **Data Density**: Uses compact row layouts with right-aligned status indicators and consistent placeholder renderings (e.g. static 'In Progress' for missing actual completion days) to avoid UI jarring or flex shifting.
 
 ### Teacher Syllabus Tracker
 *   **Header**: Current Subject context and overall completion percentage.
@@ -62,8 +63,10 @@ The interface accommodates two distinct user groups:
 *   A Footer dynamically aggregates the total days consumed by all chapters against the total available working days in the session.
 
 ### Teacher Progress Actions
-*   Clicking **Start Chapter** transitions a chapter card's badge to "In Progress" (Blue) and captures the active timestamp.
-*   Clicking **Mark Complete** evaluates the current timestamp against the planned completion date to assign either "On Track" (Green) or "Delayed" (Red) badging.
+*   Clicking **Start Chapter** transitions a chapter card's badge to "In Progress" (Blue) and captures the active timestamp. The "Actual Days" component visually anchors as "In Progress".
+*   Clicking **Mark Complete** evaluates the current timestamp against the planned completion date to badging overrides.
+    *   If On-Time: The Status Badge shifts to an emerald Green theme with a checkmark.
+    *   If Early or Delayed: The Status Badge shifts to a Red theme with a warning triangle to clearly identify deviations.
 
 ## 7. API Integration
 

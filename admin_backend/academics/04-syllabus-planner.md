@@ -104,9 +104,9 @@ The Syllabus module is strictly separated into two distinct roles and interfaces
 3.  **Performance Indicator Math**:
     *   Calculated comparing `Actual Duration` vs. `Planned Duration`.
     *   `Actual Duration = (Chapter Completion Date - Chapter Start Date)`.
-    *   **On Time (Green)**: Actual <= Planned.
-    *   **Late Completion (Red)**: Actual > Planned.
-    *   **Early Check-in (Yellow)**: Actual < Planned.
+    *   **On Time**: Actual == Planned (or close enough contextually). Returns "ON TIME". Driven natively into the UI as a **Green** confirmed status.
+    *   **Late Completion**: Actual > Planned. Returns "DELAYED". Driven natively into the UI as a **Red** warning status.
+    *   **Early Check-in**: Actual < Planned. Returns "EARLY". Driven natively into the UI as a **Red** warning status because pacing anomalies require attention.
 
 ## 7. Validation Rules
 *   Every topic MUST have a positive integer for `planned_duration_days`.

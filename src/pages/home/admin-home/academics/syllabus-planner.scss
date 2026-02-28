@@ -1,3 +1,21 @@
+.scrollbar-hide {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 .syllabus-planner {
   min-height: 100vh;
 
@@ -109,9 +127,12 @@
     font-size: 12px;
   }
 
+  // Removed __plan-form max-height to avoid internal scroller
   &__plan-form {
-    max-height: 480px;
-    overflow-y: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
   }
 
   &__plan-chapter-card {
@@ -123,6 +144,7 @@
   }
 
   &__filters {
+
     .ant-select,
     .ant-btn {
       margin-top: 4px;
@@ -137,11 +159,27 @@
 
   /* Create Syllabus Modal */
   &__create-modal {
+    &.ant-modal {
+      top: 40px;
+      padding-bottom: 40px;
+    }
+
     .ant-modal-content {
       padding: 0;
+      @extend .scrollbar-hide;
+      height: 780px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
+
     .ant-modal-body {
       padding: 0;
+      @extend .scrollbar-hide;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0; // critical for flex child to respect parent height
     }
   }
 
@@ -150,7 +188,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 24px 32px;
-    background: #fafafa;
+    background: #ffffff;
     border-bottom: 1px solid #f0f0f0;
   }
 
@@ -180,7 +218,7 @@
     font-weight: 600;
     color: #8c8c8c;
 
-    > span.active {
+    >span.active {
       color: #1677ff;
 
       .syllabus-planner__step-num {
@@ -210,11 +248,15 @@
   }
 
   &__basic-info {
-    padding: 40px;
+    padding: 32px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
   }
 
   &__info-card {
-    background: #fafafa;
+    background: #ffffff;
     border-radius: 24px;
     border: 1px solid #f0f0f0;
     padding: 24px;
@@ -240,7 +282,7 @@
   }
 
   &__form-label-upper {
-    .ant-form-item-label > label {
+    .ant-form-item-label>label {
       font-size: 11px;
       font-weight: 700;
       color: #8c8c8c;
@@ -253,7 +295,7 @@
     display: flex;
     align-items: flex-start;
     gap: 16px;
-    margin-top: 32px;
+    margin: auto 32px 0 32px; // auto top pushes to bottom, fixed sides
     padding: 16px 20px;
     background: #e6f7ff;
     border-radius: 16px;
@@ -269,65 +311,477 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px 32px;
-    background: #fafafa;
+    padding: 24px 32px;
+    background: #ffffff;
     border-top: 1px solid #f0f0f0;
-    margin-top: 24px;
+    margin-top: 0;
+    flex-shrink: 0;
   }
 
   &__curriculum-step {
-    padding-bottom: 0;
-  }
-
-  &__curriculum-content {
-    padding: 24px 32px;
-    max-height: 420px;
-    overflow-y: auto;
-  }
-
-  &__chapter-header {
-    display: flex;
-    gap: 20px;
-    align-items: flex-start;
-  }
-
-  &__chapter-fields {
+    padding: 0;
     flex: 1;
     display: flex;
-    gap: 20px;
+    flex-direction: column;
+    min-height: 0;
   }
 
-  &__duration-field {
-    min-width: 140px;
+  &__curriculum-entry-side {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border-right: 1px solid #f0f0f0;
   }
 
-  &__chapter-delete {
-    margin-top: 30px;
+  &__curriculum-summary-side {
+    background: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  &__side-header {
+    padding: 20px 24px;
+    background: white;
+    border-bottom: 1px solid #f1f5f9;
+    flex-shrink: 0;
+  }
+
+  &__entry-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    background: #ffffff;
+  }
+
+  &__entry-sub-footer {
+    padding: 16px 24px;
+    background: white;
+    border-top: 1px solid #f1f5f9;
+    flex-shrink: 0;
+  }
+
+  &__summary-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+  }
+
+  &__active-chapter-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  &__entry-card {
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+
+    .ant-card-body {
+      padding: 24px;
+    }
   }
 
   &__topics-section {
-    margin-top: 16px;
-    padding-left: 16px;
-    border-left: 2px solid #f0f0f0;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #f1f5f9;
   }
 
-  &__plan-topic-row {
+  &__topic-entry-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 8px;
+
+    .ant-form-item {
+      margin-bottom: 0;
+    }
+  }
+
+  &__topic-index-badge {
+    width: 24px;
+    height: 24px;
+    background: #f1f5f9;
+    color: #64748b;
+    border-radius: 6px;
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 12px;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    margin-top: 4px;
+    flex-shrink: 0;
+  }
+
+  &__topic-name-item {
+    flex: 1;
+  }
+
+  &__topic-duration-item {
+    width: 90px;
   }
 
   &__add-topic-btn {
-    margin-top: 8px;
-    padding-left: 0;
+    margin-top: 12px;
+    border-radius: 8px;
+    height: 40px;
+    border-color: #cbd5e1;
+    color: #64748b;
+
+    &:hover {
+      border-color: #1677ff;
+      color: #1677ff;
+    }
   }
 
-  &__add-chapter-btn {
-    margin-top: 16px;
-    padding: 24px;
-    border-style: dashed;
-    border-radius: 24px;
+  &__add-next-chapter-btn {
+    height: 48px;
+    border-radius: 12px;
+    font-weight: 600;
+    margin-top: 8px;
+  }
+
+  &__summary-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  &__summary-item-card {
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    // Removed margin-bottom to use grid gap
+
+    &:hover {
+      border-color: #1677ff;
+    }
+
+    .ant-card-body {
+      padding: 8px 10px;
+    }
+  }
+
+  &__summary-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  &__summary-item-title {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+
+    strong {
+      font-size: 11px;
+      line-height: 1.3;
+      display: block;
+      word-break: break-word;
+      overflow-wrap: break-word;
+      white-space: normal;
+    }
+
+    .ant-tag {
+      margin: 0;
+      width: fit-content;
+      font-size: 9px;
+      padding: 0 4px;
+    }
+  }
+
+  &__summary-item-topics {
+    margin-top: 6px;
+    padding-top: 4px;
+    border-top: 1px solid #f1f5f9;
+    font-size: 9px;
+    color: #64748b;
+
+    .ant-typography {
+      font-size: 9px;
+    }
+  }
+
+  &__empty-summary {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.6;
+  }
+
+  /* Modern Informative Table Styles */
+  &__informative-table {
+    border-radius: 16px;
+    background: #ffffff;
+    border: 1px solid #eef2f6;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    overflow: hidden;
+
+    .ant-table-thead>tr>th {
+      background: #f8fafc;
+      color: #64748b;
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      border-bottom: 1px solid #eef2f6;
+      padding: 18px 24px;
+
+      &:before {
+        display: none !important;
+      }
+    }
+
+    .ant-table-tbody>tr>td {
+      padding: 16px 24px;
+      border-bottom: 1px dashed #f1f5f9;
+      transition: all 0.2s ease;
+      vertical-align: middle;
+      background: transparent !important;
+    }
+
+    .ant-table-tbody>tr:hover>td {
+      background: #fdfdfe !important;
+    }
+
+    .ant-table-tbody>tr:last-child>td {
+      border-bottom: none;
+    }
+
+    /* Sub-components for table data */
+    .subject-info {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+
+      .icon-box {
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+        background: #f0f5ff;
+        color: #2f54eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        flex-shrink: 0;
+      }
+
+      .text-content {
+        .title {
+          font-size: 16px;
+          font-weight: 700;
+          color: #0f172a;
+          margin: 0 0 4px 0;
+        }
+
+        .instructor {
+          font-size: 13px;
+          color: #64748b;
+        }
+      }
+    }
+
+    .curriculum-stats {
+      .stat-main {
+        font-size: 15px;
+        font-weight: 700;
+        color: #1e293b;
+      }
+
+      .stat-sub {
+        font-size: 12px;
+        color: #64748b;
+        margin-top: 4px;
+      }
+    }
+
+    .modern-status-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+
+      &.in-progress {
+        background: #eff6ff;
+        color: #2563eb;
+      }
+
+      &.completed {
+        background: #f0fdf4;
+        color: #16a34a;
+      }
+
+      &.not-started {
+        background: #f1f5f9;
+        color: #64748b;
+      }
+    }
+
+    .timeline-info {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: flex-start;
+
+      .date-label {
+        font-size: 11px;
+        color: #94a3b8;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+    }
+
+    .view-plan-btn {
+      border-radius: 10px;
+      font-weight: 600;
+      border-color: #2563eb;
+      color: #2563eb;
+      height: 38px;
+      padding: 0 20px;
+
+      &:hover {
+        background: #eff6ff !important;
+      }
+    }
+  }
+
+  &__back-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-color: #eef2f6;
+    color: #64748b;
+  }
+
+  /* Expanded Row Styles for Detail View */
+  &__expanded-topics {
+    padding: 20px 24px;
+    background: #fdfdfe;
+    border-top: 1px dashed #e2e8f0;
+    margin-top: -1px;
+  }
+
+  &__topics-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+
+    .ant-typography {
+      font-size: 13px;
+      color: #1e293b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  }
+
+  &__topics-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  &__topic-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #ffffff;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid #f1f5f9;
+  }
+
+  &__topic-index {
+    font-family: 'Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: #94a3b8;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+  }
+
+  &__topic-main {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__expand-btn {
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #1677ff;
+    background: #f0f7ff;
+
+    &:hover {
+      background: #e6f4ff;
+    }
+  }
+
+  &__table-card {
+    background: transparent;
+    border: none !important;
+    box-shadow: none !important;
+
+    .ant-card-body {
+      padding: 0;
+    }
+
+    .ant-table {
+      background: transparent !important;
+    }
+
+    /* Individual Card-like Rows */
+    .ant-table-tbody>tr.ant-table-row {
+      display: flex;
+      align-items: center;
+      background: #ffffff;
+      border: 1px solid #eef2f6;
+      border-radius: 16px;
+      margin-bottom: 12px;
+      padding: 4px 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+      transition: all 0.3s ease;
+      cursor: default;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
+        border-color: #cbd5e1;
+      }
+
+      .ant-table-cell {
+        border-bottom: none !important;
+        background: transparent !important;
+        flex: 1;
+        padding: 12px 6px;
+        display: flex;
+        align-items: center;
+        min-width: 0; // for text truncation if needed
+
+        &:last-child {
+          justify-content: flex-end;
+          flex: 0 0 auto; // Actions shouldn't grow
+        }
+      }
+    }
   }
 }
-
