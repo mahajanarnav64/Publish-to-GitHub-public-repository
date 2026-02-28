@@ -1,0 +1,1487 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timetable Management | Hybrid School</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+
+        /* Unified Sidebar Styles */
+        .sidebar-rail {
+            background-color: #ffffff;
+            border-right: 1px solid #e5e7eb;
+            color: #64748b;
+            z-index: 50;
+        }
+
+        .sidebar-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 0;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            width: 100%;
+        }
+
+        .sidebar-item:hover {
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+
+        .sidebar-item.active {
+            color: #2563eb;
+            background-color: #eff6ff;
+        }
+
+        .sidebar-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 15%;
+            height: 70%;
+            width: 3px;
+            background-color: #2563eb;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .sidebar-icon {
+            font-size: 1.25rem;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-label {
+            font-size: 0.65rem;
+            text-align: center;
+            line-height: 1.2;
+            font-weight: 500;
+        }
+
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Narrow Rail Styles */
+        .sidebar-rail {
+            background-color: #ffffff;
+            border-right: 1px solid #f1f5f9;
+            color: #64748b;
+            z-index: 50;
+        }
+
+        .sidebar-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 0;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            width: 100%;
+        }
+
+        .sidebar-item:hover {
+            color: #3b82f6;
+            background-color: #f8fafc;
+        }
+
+        .sidebar-item.active {
+            color: #2563eb;
+            background-color: #eff6ff;
+        }
+
+        .sidebar-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background-color: #2563eb;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .sidebar-icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-label {
+            font-size: 11px;
+            text-align: center;
+            line-height: 1.2;
+            font-weight: 600;
+        }
+    </style>
+
+</head>
+
+<body x-data="timetableApp()" class="flex h-screen overflow-hidden text-slate-700 bg-slate-50"
+    @click="activeCell = null" @keydown.escape.window="activeCell = null">
+
+    <!-- SIDEBAR (Reused Structure) -->
+    <!-- 1. NARROW RAIL SIDEBAR -->
+    <aside class="sidebar-rail w-[84px] flex flex-col flex-shrink-0 z-50 h-full shadow-sm relative">
+
+        <!-- Logo -->
+        <div class="h-[76px] flex items-center justify-center border-b border-slate-100 flex-shrink-0">
+            <div
+                class="w-11 h-11 bg-[#2563eb] rounded-xl flex items-center justify-center text-white font-extrabold text-2xl shadow-sm">
+                H</div>
+        </div>
+
+        <!-- Getting Started -->
+        <div class="px-3 mb-5 mt-4">
+            <button
+                class="w-full py-3.5 bg-[#eff6ff] text-[#2563eb] hover:bg-blue-100 rounded-2xl flex flex-col items-center justify-center transition-colors border border-blue-100/50 shadow-sm">
+                <i class="fa-solid fa-rocket text-[17px] mb-1.5"></i>
+                <span class="text-[10px] font-bold text-center leading-tight">Quick<br>Start</span>
+            </button>
+        </div>
+
+        <!-- Nav Items -->
+        <nav class="flex-1 pb-4 overflow-y-auto scrollbar-hide flex flex-col items-center">
+
+            <a href="../index.html" class="sidebar-item">
+                <i class="fa-solid fa-gauge-high sidebar-icon"></i><span class="sidebar-label">Home</span>
+            </a>
+
+            <a href="#" class="sidebar-item">
+                <i class="fa-solid fa-bell-concierge sidebar-icon"></i><span
+                    class="sidebar-label">Front<br>Office</span>
+            </a>
+
+            <a href="#" class="sidebar-item">
+                <i class="fa-solid fa-user-plus sidebar-icon"></i><span class="sidebar-label">Admit</span>
+            </a>
+
+            <a href="#" class="sidebar-item">
+                <i class="fa-solid fa-graduation-cap sidebar-icon"></i><span class="sidebar-label">Student</span>
+            </a>
+
+            <a href="../index.html?module=academics" class="sidebar-item active"><i
+                    class="fa-solid fa-book-open sidebar-icon"></i><span class="sidebar-label">Academia</span></a>
+
+
+
+            <a href="#" class="sidebar-item">
+                <i class="fa-solid fa-users-gear sidebar-icon"></i><span class="sidebar-label">HR</span>
+            </a>
+
+            <a href="../finance/index.html" class="sidebar-item">
+                <i class="fa-solid fa-coins sidebar-icon"></i><span class="sidebar-label">Finance</span>
+            </a>
+        </nav>
+
+        <div class="mt-auto pb-6 pt-4 border-t border-slate-100 flex-shrink-0">
+            <a href="#" class="sidebar-item !py-2">
+                <i class="fa-solid fa-gear sidebar-icon"></i><span class="sidebar-label">Config</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden relative">
+
+        <!-- HEADER -->
+        <header
+            class="bg-white border-b border-gray-200 h-20 flex items-center justify-between px-6 z-10 sticky top-0 flex-shrink-0">
+            <div class="flex items-center gap-4">
+                <a x-show="currentView === 'list'" href="../index.html?module=academics"
+                    class="w-8 h-8 rounded-full hover:bg-slate-200 bg-slate-100 flex items-center justify-center text-slate-500 transition-colors tooltip"
+                    title="Back to Dashboard">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </a>
+                <button x-show="currentView !== 'list'" @click="currentView='list';"
+                    class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-colors">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <div>
+                    <h1 class="text-xl font-bold text-slate-800"
+                        x-text="currentView === 'list' ? 'Timetable Management' : (viewedClass ? viewedClass.name + ' - ' + viewedSection.name + ' Timetable' : '')">
+                    </h1>
+                    <div class="text-xs text-slate-400 mt-0.5"
+                        x-text="currentView === 'list' ? 'Create and manage class schedules' : 'Manage structural and period assignments'">
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+
+                <button @click="startCreatingTimetable()" x-show="currentView === 'list'" x-cloak
+                    class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-2 rounded shadow-sm flex items-center gap-2 transition-all">
+                    <i class="fa-solid fa-plus text-xs"></i> Create Timetable
+                </button>
+
+                <!-- Builder Only Headers -->
+                <div class="flex items-center gap-3" x-show="currentView === 'builder'" x-cloak>
+                    <button
+                        class="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 text-sm font-semibold px-4 py-2 rounded shadow-sm flex items-center gap-2 transition-all">
+                        <i class="fa-regular fa-floppy-disk text-slate-400"></i> Save
+                    </button>
+                    <button
+                        class="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 text-sm font-semibold px-4 py-2 rounded shadow-sm flex items-center gap-2 transition-all">
+                        <i class="fa-solid fa-arrow-up-from-bracket text-slate-400"></i> Publish
+                    </button>
+                    <button @click="duplicateDayModal = true"
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-2 rounded shadow-sm flex items-center gap-2 transition-all">
+                        <i class="fa-regular fa-copy"></i> Duplicate
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- VIEW 1: TABLE VIEW -->
+        <div x-show="currentView === 'list'" class="flex-1 overflow-y-auto p-6 bg-slate-50" x-cloak>
+
+            <!-- Filter Card (Matches Original Image) -->
+            <div class="bg-white rounded-xl border border-slate-200 p-4 mb-6 shadow-sm">
+                <div class="flex gap-4 items-end">
+                    <div class="flex-1">
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">Month</label>
+                        <select
+                            class="w-full border border-slate-200 rounded-lg p-2 text-sm text-slate-700 bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-shadow text-left focus:border-blue-500 appearance-none">
+                            <option>January</option>
+                        </select>
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">Class</label>
+                        <select
+                            class="w-full border border-slate-200 rounded-lg p-2 text-sm text-slate-700 bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-shadow text-left focus:border-blue-500 appearance-none">
+                            <option>All Classes</option>
+                        </select>
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">Section</label>
+                        <select
+                            class="w-full border border-slate-200 rounded-lg p-2 text-sm text-slate-700 bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-shadow text-left focus:border-blue-500 appearance-none">
+                            <option>All Sections</option>
+                        </select>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <button
+                            class="bg-slate-800 hover:bg-slate-900 text-white text-sm font-semibold px-6 py-2 rounded-lg transition-colors">Apply</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Classes Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <template x-for="cls in classList" :key="cls.id">
+                    <div
+                        class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col transition-all hover:shadow-md hover:border-indigo-300">
+                        <!-- Card Header -->
+                        <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/30 cursor-pointer hover:bg-slate-50 transition-colors"
+                            @click="cls.expanded = !cls.expanded">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-lg shadow-sm border border-indigo-100"
+                                    x-text="cls.name.split(' ')[1] || cls.name"></div>
+                                <div>
+                                    <h3 class="font-bold text-slate-800 text-lg" x-text="cls.name"></h3>
+                                    <p class="text-slate-500 text-sm mt-0.5" x-text="cls.sections.length + ' Sections'">
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 bg-white border border-slate-200 shadow-sm transition-transform duration-300"
+                                :class="cls.expanded ? 'rotate-180 bg-indigo-50 text-indigo-600 border-indigo-200' : ''">
+                                <i class="fa-solid fa-chevron-down text-sm"></i>
+                            </div>
+                        </div>
+
+                        <!-- Card Body (Sections List) -->
+                        <div class="p-4 flex-1 flex flex-col gap-3 bg-white" x-show="cls.expanded"
+                            x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="opacity-0 -translate-y-2"
+                            x-transition:enter-end="opacity-100 translate-y-0" x-cloak>
+                            <template x-for="section in cls.sections" :key="section.id">
+                                <div
+                                    class="bg-slate-50 border border-slate-200 rounded-lg p-3 hover:border-indigo-200 transition-colors">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <div class="flex items-center gap-2">
+                                            <span class="font-bold text-slate-700 text-sm"
+                                                x-text="'Section ' + section.name"></span>
+                                            <span x-show="section.hasTimetable"
+                                                class="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide">Active</span>
+                                            <span x-show="!section.hasTimetable"
+                                                class="bg-slate-200 text-slate-500 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide">Empty</span>
+                                        </div>
+                                        <span class="text-xs text-slate-500 font-medium">Jan</span>
+                                    </div>
+
+                                    <div class="flex items-center justify-between text-xs text-slate-500 mb-3"
+                                        x-show="section.hasTimetable">
+                                        <span>08:00 AM - 02:00 PM</span>
+                                        <span class="font-bold text-slate-700">8 Periods</span>
+                                    </div>
+
+                                    <!-- Action Buttons container -->
+                                    <div
+                                        class="flex items-center justify-between border-t border-slate-200 pt-2 object-bottom mt-auto">
+                                        <template x-if="section.hasTimetable">
+                                            <div class="flex flex-1 justify-between px-1">
+                                                <div class="flex gap-3 text-slate-400">
+                                                    <button title="View Builder" @click="goToTimetable(cls, section)"
+                                                        class="hover:text-slate-600 transition-colors"><i
+                                                            class="fa-solid fa-eye text-sm"></i></button>
+                                                    <button title="Assign Periods" @click="goToTimetable(cls, section)"
+                                                        class="hover:text-blue-600 transition-colors"><i
+                                                            class="fa-solid fa-calendar-days text-sm"></i></button>
+                                                    <button title="Duplicate Timeline" @click="replicateModal = true"
+                                                        class="hover:text-amber-500 transition-colors"><i
+                                                            class="fa-solid fa-copy text-sm"></i></button>
+                                                    <button title="Edit Settings" @click="startCreatingTimetable()"
+                                                        class="hover:text-indigo-500 transition-colors"><i
+                                                            class="fa-solid fa-pen text-sm"></i></button>
+                                                    <button title="Delete"
+                                                        @click="if(confirm('Are you sure you want to clear this sections timetable entirely?')) section.hasTimetable = false;"
+                                                        class="hover:text-rose-500 transition-colors"><i
+                                                            class="fa-solid fa-trash text-sm"></i></button>
+                                                </div>
+                                            </div>
+                                        </template>
+                                        <template x-if="!section.hasTimetable">
+                                            <button @click="startCreatingTimetable()"
+                                                class="w-full text-center text-[11px] font-bold text-indigo-700 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 shadow-sm px-3 py-1.5 rounded uppercase tracking-wide transition-colors">
+                                                + Create Timetable
+                                            </button>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- VIEW 3: EMPTY STATE (NO TIMETABLE) -->
+        <div x-show="currentView === 'empty'" class="flex-1 flex items-center justify-center p-6 bg-slate-50" x-cloak>
+            <div class="max-w-md w-full text-center">
+                <div class="w-24 h-24 mx-auto mb-6 bg-indigo-50 rounded-full flex items-center justify-center">
+                    <i class="fa-regular fa-calendar-xmark text-4xl text-indigo-400"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">No Timetable Yet</h2>
+                <p class="text-slate-500 mb-8 leading-relaxed">There is currently no schedule defined for <span
+                        class="font-bold text-slate-700"
+                        x-text="viewedClass?.name + ' - ' + viewedSection?.name"></span>. Create one now to assign
+                    periods and teachers.</p>
+                <button @click="startCreatingTimetable()"
+                    class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg shadow-sm transition-all flex items-center justify-center gap-2 mx-auto">
+                    <i class="fa-solid fa-plus"></i> Create Timetable Structure
+                </button>
+            </div>
+        </div>
+
+        <!-- VIEW 4: 3-COLUMN CONTENT AREA (BUILDER) -->
+        <div x-show="currentView === 'builder'" class="flex-1 flex overflow-hidden" x-cloak>
+
+            <!-- CENTER PANEL: GRID -->
+            <div class="flex-1 bg-white p-6 overflow-y-auto">
+                <div class="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                    <table class="w-full text-sm text-center">
+                        <thead>
+                            <tr
+                                class="bg-slate-50 border-b border-slate-200 text-xs text-slate-700 font-bold h-12 relative z-20">
+                                <th
+                                    class="w-28 border-r border-slate-200 px-2 py-3 bg-slate-50 sticky left-0 z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
+                                    Time</th>
+                                <template x-for="day in days">
+                                    <th class="border-r border-slate-200 last:border-r-0 px-2 py-3 w-[14.5%]"
+                                        x-text="day"></th>
+                                </template>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template x-for="period in periods" :key="period.id">
+                                <tr class="border-b border-slate-200 last:border-0 group transition-colors relative"
+                                    :class="{
+                                        'h-[88px] hover:bg-slate-50/30': period.type === 'period',
+                                        'h-12 bg-purple-50/20': period.type === 'assembly',
+                                        'h-12 bg-slate-100/50': period.type === 'break'
+                                    }">
+
+                                    <!-- Time column -->
+                                    <td class="border-r border-slate-200 relative align-middle sticky left-0 z-30 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]"
+                                        :class="period.type === 'period' ? 'bg-white' : (period.type === 'assembly' ? 'bg-purple-50' : 'bg-slate-50')">
+                                        <div
+                                            class="flex flex-col items-center justify-center w-full h-full p-2 relative group/time">
+                                            <template x-if="period.type === 'period'">
+                                                <div class="flex flex-col items-center justify-center">
+                                                    <span class="text-xs font-bold text-slate-700"
+                                                        x-text="period.name"></span>
+                                                    <span class="text-[10px] font-medium text-slate-500 mt-0.5"
+                                                        x-text="period.startTime + ' - ' + period.endTime"></span>
+                                                    <!-- Add Break Button beneath period time -->
+                                                    <button @click="openAddBreak(period.index)"
+                                                        class="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-white border border-blue-200 text-blue-600 hover:bg-blue-50 text-[9px] uppercase font-bold px-2 py-0.5 rounded-full flex items-center justify-center gap-1 shadow-sm opacity-0 group-hover/time:opacity-100 transition-all z-50">
+                                                        <i class="fa-solid fa-plus text-[8px]"></i> Break
+                                                    </button>
+                                                </div>
+                                            </template>
+                                            <template x-if="period.type === 'assembly'">
+                                                <div class="flex flex-col items-center justify-center text-purple-700">
+                                                    <i class="fa-solid fa-bullhorn text-[10px] opacity-70 mb-0.5"></i>
+                                                    <span class="text-[10px] font-bold uppercase tracking-wider"
+                                                        x-text="period.name"></span>
+                                                    <span class="text-[9px] font-semibold opacity-80"
+                                                        x-text="period.startTime + ' - ' + period.endTime"></span>
+                                                </div>
+                                            </template>
+                                            <template x-if="period.type === 'break'">
+                                                <div class="flex flex-col items-center justify-center text-slate-500">
+                                                    <i class="fa-solid fa-mug-hot text-[10px] opacity-70 mb-0.5"></i>
+                                                    <span class="text-[10px] font-bold uppercase tracking-wider"
+                                                        x-text="period.name"></span>
+                                                    <span class="text-[9px] font-medium opacity-80"
+                                                        x-text="period.startTime + ' - ' + period.endTime"></span>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </td>
+
+                                    <template x-if="period.type === 'period'">
+                                        <template x-for="day in days">
+                                            <td
+                                                class="border-r border-slate-200 last:border-r-0 relative p-0 align-top text-center w-[14.5%]">
+
+                                                <!-- Assigned State -->
+                                                <template
+                                                    x-if="grid[day] && grid[day][period.id] && grid[day][period.id].spanOwner === period.id">
+                                                    <div class="absolute rounded-lg flex flex-col items-center justify-center cursor-pointer transition-all group/cell shadow-sm z-10 overflow-hidden outline outline-1 hover:shadow-md"
+                                                        :class="{
+                                                            'bg-indigo-50 outline-indigo-200 hover:bg-indigo-100': grid[day][period.id].type === 'class',
+                                                            'bg-red-50 outline-red-200 hover:bg-red-100': grid[day][period.id].type === 'exam',
+                                                            'bg-orange-50 outline-orange-200 hover:bg-orange-100': grid[day][period.id].type === 'event'
+                                                        }" :style="getSpanStyle(day, period.id)"
+                                                        @click.stop="openCellAssignment(day, period.id)"
+                                                        title="Click to replace">
+
+                                                        <template x-if="grid[day][period.id].type === 'class'">
+                                                            <div class="w-full px-1 text-center">
+                                                                <span
+                                                                    class="block text-xs font-bold text-indigo-800 truncate"
+                                                                    x-text="grid[day][period.id].subject"></span>
+                                                                <span
+                                                                    class="block text-[10px] text-indigo-600 mt-0.5 font-medium truncate"
+                                                                    x-text="getTeacherName(grid[day][period.id].teacherId)"></span>
+                                                            </div>
+                                                        </template>
+
+                                                        <template x-if="grid[day][period.id].type === 'exam'">
+                                                            <div class="w-full px-1 text-center text-red-800">
+                                                                <span
+                                                                    class="block text-[10px] font-black uppercase text-red-900 truncate tracking-wide"
+                                                                    x-text="grid[day][period.id].examTitle || 'Exam'"></span>
+                                                                <span
+                                                                    class="block text-[11px] font-bold text-red-600 mt-0.5"
+                                                                    x-text="grid[day][period.id].subject"></span>
+                                                            </div>
+                                                        </template>
+
+                                                        <template x-if="grid[day][period.id].type === 'event'">
+                                                            <div class="w-full px-1 text-center">
+                                                                <span
+                                                                    class="block text-[11px] font-black uppercase tracking-wider text-orange-900"
+                                                                    x-text="grid[day][period.id].eventTitle || 'Event'"></span>
+                                                            </div>
+                                                        </template>
+
+                                                        <!-- Clear button inner -->
+                                                        <button @click.stop="clearCell(day, period.id)"
+                                                            class="absolute -top-1 -right-1 opacity-0 group-hover/cell:opacity-100 text-slate-400 hover:text-red-500 bg-white border border-slate-200 shadow-sm rounded-full w-5 h-5 flex items-center justify-center z-20">
+                                                            <i class="fa-solid fa-xmark text-[10px] leading-none"></i>
+                                                        </button>
+                                                    </div>
+                                                </template>
+
+                                                <!-- Empty Assign Button State -->
+                                                <template
+                                                    x-if="grid[day] && !grid[day][period.id] && !isSpannedOver(day, period)">
+                                                    <button @click.stop="openCellAssignment(day, period.id)"
+                                                        class="absolute inset-2 text-slate-400 hover:text-indigo-600 hover:bg-slate-50 hover:border-indigo-200 hover:border-dashed border border-transparent rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all outline-none"
+                                                        :class="activeCell?.day === day && activeCell?.periodId === period.id ? 'bg-indigo-50 border-solid border-indigo-500 text-indigo-600 ring-4 ring-indigo-500/10 shadow-sm z-0' : ''">
+                                                        <i class="fa-solid fa-plus text-[10px]"></i> Assign
+                                                    </button>
+                                                </template>
+                                            </td>
+                                        </template>
+                                    </template>
+
+                                    <template x-if="period.type !== 'period'">
+                                        <td :colspan="days.length" class="text-center p-0 relative overflow-hidden"
+                                            :style="period.type === 'assembly' ? 'background-image: repeating-linear-gradient(-45deg, transparent, transparent 10px, rgba(168,85,247,0.05) 10px, rgba(168,85,247,0.05) 11px);' : 'background-image: repeating-linear-gradient(-45deg, transparent, transparent 10px, rgba(0,0,0,0.03) 10px, rgba(0,0,0,0.03) 11px);'">
+                                            <div class="flex items-center justify-center h-full opacity-40">
+                                                <span
+                                                    class="tracking-[0.4em] font-black text-slate-500 uppercase text-xs"
+                                                    x-text="period.name"></span>
+                                            </div>
+                                        </td>
+                                    </template>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- DRAWER: TEACHER AVAILABILITY -->
+            <!-- Backdrop -->
+            <div x-show="activeCell" x-transition.opacity class="fixed inset-0 bg-slate-900/20 backdrop-blur-[2px] z-40"
+                @click="activeCell = null" x-cloak></div>
+
+            <div x-show="activeCell" @click.stop x-transition:enter="transition ease-out duration-300 transform"
+                x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0"
+                x-transition:leave="transition ease-in duration-200 transform" x-transition:leave-start="translate-x-0"
+                x-transition:leave-end="translate-x-full"
+                class="fixed right-0 top-0 h-full w-72 bg-white border-l border-slate-200 p-5 overflow-y-auto shadow-2xl z-50 flex flex-col"
+                x-cloak>
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-[15px] font-semibold text-slate-800 flex items-center gap-2">
+                        <i class="fa-regular fa-calendar-plus text-slate-400 text-sm"></i> Assign Slot
+                    </h3>
+                    <button @click="activeCell = null"
+                        class="text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <!-- Type Tabs -->
+                <div class="flex bg-slate-100 p-1 rounded-lg mb-5 border border-slate-200/60 shadow-inner">
+                    <button @click="assignTab = 'class'"
+                        class="flex-1 py-1.5 text-xs font-bold uppercase rounded-md transition-all outline-none"
+                        :class="assignTab === 'class' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'">Class</button>
+                    <button @click="assignTab = 'exam'"
+                        class="flex-1 py-1.5 text-xs font-bold uppercase rounded-md transition-all outline-none"
+                        :class="assignTab === 'exam' ? 'bg-white text-red-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'">Exam</button>
+                    <button @click="assignTab = 'event'"
+                        class="flex-1 py-1.5 text-xs font-bold uppercase rounded-md transition-all outline-none"
+                        :class="assignTab === 'event' ? 'bg-white text-orange-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'">Event</button>
+                </div>
+
+                <!-- Panel: Class -->
+                <div x-show="assignTab === 'class'" class="space-y-4 flex flex-col flex-1 min-h-0">
+                    <div>
+                        <label
+                            class="block text-[11px] font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Subject</label>
+                        <select x-model="assignForm.subject"
+                            class="w-full border border-slate-200 rounded-lg text-sm bg-slate-50 focus:bg-white p-2.5 outline-none focus:ring-2 focus:ring-indigo-500 font-medium text-slate-700 shadow-sm appearance-none">
+                            <option value="">Select Subject...</option>
+                            <option>Mathematics</option>
+                            <option>Science</option>
+                            <option>English</option>
+                            <option>Social Studies</option>
+                            <option>Hindi</option>
+                        </select>
+                    </div>
+
+                    <div class="flex flex-col flex-1 min-h-0 relative">
+                        <label
+                            class="block text-[11px] font-bold text-slate-500 mb-1.5 uppercase tracking-wide flex-shrink-0">Teacher
+                            List</label>
+                        <div class="space-y-1.5 flex-1 overflow-y-auto pr-1 pb-4">
+                            <template x-for="teacher in teachers" :key="teacher.id">
+                                <div class="flex gap-3 items-center group/teacher cursor-pointer p-2 -mx-2 rounded-lg border border-transparent transition-all"
+                                    :class="(assignForm.subject && activeCell && teacher.available) ? 'hover:bg-indigo-50 hover:border-indigo-100 hover:shadow-sm' : 'opacity-60 grayscale-[30%] pointer-events-none'"
+                                    @click="assignType('class', teacher)">
+                                    <!-- Avatar -->
+                                    <div class="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-sm"
+                                        :class="teacher.color" x-text="teacher.initial"></div>
+                                    <!-- Info -->
+                                    <div class="flex-1 min-w-0">
+                                        <div class="text-[13px] font-bold text-slate-800 truncate"
+                                            x-text="teacher.name"></div>
+                                        <div class="text-[11px] font-medium text-slate-500 mt-0.5 truncate border-b border-slate-100 pb-1"
+                                            x-text="teacher.subject"></div>
+                                        <div class="text-[10px] font-semibold flex items-center gap-1.5 mt-1"
+                                            :class="teacher.available ? 'text-emerald-600' : 'text-rose-500'">
+                                            <i x-show="teacher.available" class="fa-regular fa-circle-check"></i>
+                                            <i x-show="!teacher.available" class="fa-regular fa-circle-xmark"></i>
+                                            <span class="truncate" x-text="teacher.status"></span>
+                                        </div>
+                                    </div>
+                                    <div class="flex-shrink-0 w-5 flex justify-center opacity-0 transition-opacity"
+                                        :class="(activeCell && teacher.available && assignForm.subject) ? 'group-hover/teacher:opacity-100' : ''">
+                                        <i class="fa-solid fa-arrow-left mt-0.5 text-indigo-400 text-xs"></i>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Helper message -->
+                        <div x-show="!assignForm.subject"
+                            class="absolute inset-0 top-6 bg-white/90 backdrop-blur-[1px] flex flex-col items-center justify-center text-center p-4">
+                            <i class="fa-solid fa-hand-pointer text-2xl text-slate-300 mb-2"></i>
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">Select a subject
+                                first<br>to assign a teacher</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel: Exam -->
+                <div x-show="assignTab === 'exam'" class="space-y-4">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Exam
+                            Title</label>
+                        <input type="text" x-model="assignForm.examTitle"
+                            class="w-full border border-slate-200 rounded-lg text-sm bg-slate-50 focus:bg-white p-2.5 outline-none focus:ring-2 focus:ring-red-400 font-medium text-slate-700 shadow-sm"
+                            placeholder="e.g. Mid-Term">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Subject
+                            (Optional)</label>
+                        <input type="text" x-model="assignForm.subject"
+                            class="w-full border border-slate-200 rounded-lg text-sm bg-slate-50 focus:bg-white p-2.5 outline-none focus:ring-2 focus:ring-red-400 font-medium text-slate-700 shadow-sm"
+                            placeholder="e.g. Science">
+                    </div>
+                    <div>
+                        <label
+                            class="block text-[11px] font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Duration
+                            (Periods)</label>
+                        <select x-model.number="assignForm.duration"
+                            class="w-full border border-slate-200 rounded-lg text-sm bg-slate-50 focus:bg-white p-2.5 outline-none focus:ring-2 focus:ring-red-400 font-medium text-slate-700 shadow-sm appearance-none">
+                            <option value="1">1 Period</option>
+                            <option value="2">2 Periods</option>
+                            <option value="3">3 Periods</option>
+                            <option value="4">4 Periods</option>
+                        </select>
+                    </div>
+                    <button @click="assignType('exam')"
+                        class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-lg transition-colors text-sm shadow-sm mt-4">Assign
+                        Exam</button>
+                </div>
+
+                <!-- Panel: Event -->
+                <div x-show="assignTab === 'event'" class="space-y-4">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Event
+                            Title</label>
+                        <input type="text" x-model="assignForm.eventTitle"
+                            class="w-full border border-slate-200 rounded-lg text-sm bg-slate-50 focus:bg-white p-2.5 outline-none focus:ring-2 focus:ring-orange-400 font-medium text-slate-700 shadow-sm"
+                            placeholder="e.g. Assembly Setup">
+                    </div>
+                    <div>
+                        <label
+                            class="block text-[11px] font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Duration
+                            (Periods)</label>
+                        <select x-model.number="assignForm.duration"
+                            class="w-full border border-slate-200 rounded-lg text-sm bg-slate-50 focus:bg-white p-2.5 outline-none focus:ring-2 focus:ring-orange-400 font-medium text-slate-700 shadow-sm appearance-none">
+                            <option value="1">1 Period</option>
+                            <option value="2">2 Periods</option>
+                            <option value="3">3 Periods</option>
+                            <option value="4">4 Periods</option>
+                            <option value="8">Full Day (8 Periods)</option>
+                        </select>
+                    </div>
+                    <button @click="assignType('event')"
+                        class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 rounded-lg transition-colors text-sm shadow-sm mt-4">Assign
+                        Event</button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- 1. NEW SCHEDULE MODAL -->
+    <div x-show="createScheduleModal"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm"
+        style="display: none;">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden" @click.stop>
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <h3 class="font-bold text-slate-800">Create New Schedule Container</h3>
+                <button @click="createScheduleModal = false" class="text-slate-400 hover:text-slate-600"><i
+                        class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Form Fields -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Class *</label>
+                    <select class="w-full border-slate-200 rounded-lg text-sm p-2.5 shadow-sm">
+                        <option>Class V</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Section *</label>
+                    <select class="w-full border-slate-200 rounded-lg text-sm p-2.5 shadow-sm">
+                        <option>A</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Month *</label>
+                    <select class="w-full border-slate-200 rounded-lg text-sm p-2.5 shadow-sm">
+                        <option>January</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Period Type</label>
+                    <div class="flex items-center gap-4 mt-2">
+                        <label class="flex items-center gap-2 text-sm"><input type="radio" name="type" checked> Day
+                            Wise</label>
+                        <label class="flex items-center gap-2 text-sm"><input type="radio" name="type"> Date
+                            Wise</label>
+                    </div>
+                </div>
+
+                <div class="md:col-span-2 border-t border-slate-100 my-2"></div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Start Time *</label>
+                    <input type="time" x-model="config.startTime"
+                        class="w-full border border-slate-200 rounded-lg text-sm p-2.5 shadow-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Morning Assembly (mins) *</label>
+                    <input type="number" x-model.number="config.assemblyMins"
+                        class="w-full border border-slate-200 rounded-lg text-sm p-2.5 shadow-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                        placeholder="0 if NONE">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Total Periods *</label>
+                    <input type="number" x-model.number="config.numPeriods" min="1" max="15"
+                        class="w-full border border-slate-200 rounded-lg text-sm p-2.5 shadow-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Duration (mins) *</label>
+                    <input type="number" x-model.number="config.periodMins"
+                        class="w-full border border-slate-200 rounded-lg text-sm p-2.5 shadow-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Break Time *</label>
+                    <div class="flex gap-2">
+                        <input type="time" x-model="config.defaultBreakStart"
+                            class="w-1/2 border border-slate-200 rounded-lg text-sm p-2.5 shadow-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                        <input type="time" x-model="config.defaultBreakEnd"
+                            class="w-1/2 border border-slate-200 rounded-lg text-sm p-2.5 shadow-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                </div>
+            </div>
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+                <button @click="createScheduleModal = false"
+                    class="text-slate-600 font-medium text-sm px-4 py-2">Cancel</button>
+                <button @click="saveSchedule()"
+                    class="bg-blue-600 text-white font-medium text-sm px-4 py-2 rounded-lg shadow-sm hover:bg-blue-700">Create
+                    Structure</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. ASSIGN PERIODS MODAL -->
+    <div x-show="assignPeriodsModal"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm"
+        style="display: none;">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col overflow-hidden" @click.stop>
+
+            <!-- Modal Header -->
+            <div
+                class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 flex-shrink-0">
+                <div>
+                    <h3 class="font-bold text-slate-800">Assign Periods</h3>
+                    <p class="text-xs text-slate-500">
+                        <span x-text="currentSchedule ? currentSchedule.class : ''"></span> -
+                        <span x-text="currentSchedule ? currentSchedule.section : ''"></span> |
+                        <span x-text="currentSchedule ? currentSchedule.month : ''"></span>
+                        <span
+                            class="ml-2 px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold uppercase"
+                            x-text="currentSchedule ? currentSchedule.type : ''"></span>
+                    </p>
+                </div>
+                <button @click="assignPeriodsModal = false" class="text-slate-400 hover:text-slate-600"><i
+                        class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <!-- TYPE 1: Date Picker (If Date Wise) -->
+            <div x-show="currentSchedule && currentSchedule.type === 'Date Wise'"
+                class="px-6 py-3 border-b border-slate-200 bg-white flex items-center gap-4">
+                <label class="text-sm font-semibold text-slate-600">Select Date:</label>
+                <input type="date" x-model="selectedDate"
+                    class="border border-slate-300 rounded-lg px-3 py-1.5 text-sm shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                <div class="text-xs text-slate-400 italic flex-1 text-right">Assigning specifically for this date</div>
+            </div>
+
+            <!-- TYPE 2: Day Tabs & Copy Action (If Day Wise) -->
+            <div x-show="currentSchedule && currentSchedule.type === 'Day Wise'"
+                class="flex justify-between items-end border-b border-slate-200 px-6 pt-2 bg-white flex-shrink-0">
+                <div class="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide">
+                    <template x-for="day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']">
+                        <button @click="selectedDay = day"
+                            class="pb-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap"
+                            :class="selectedDay === day ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'">
+                            <span x-text="day"></span>
+                        </button>
+                    </template>
+                </div>
+
+                <!-- Copy Dropdown (Alpine Component) -->
+                <div class="pb-2 relative" x-data="{ showCopyMenu: false, targets: [] }">
+                    <button @click="showCopyMenu = !showCopyMenu"
+                        class="text-xs font-medium text-blue-600 hover:text-blue-800 flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors">
+                        <i class="fa-regular fa-copy"></i>
+                        <span class="hidden sm:inline">Copy <span x-text="selectedDay"></span></span>
+                    </button>
+
+                    <!-- Dropdown Content -->
+                    <div x-show="showCopyMenu" @click.outside="showCopyMenu = false"
+                        class="absolute right-0 top-full mt-1 w-56 bg-white border border-slate-200 shadow-xl rounded-lg p-3 z-50">
+                        <div class="text-xs font-bold text-slate-700 mb-2 border-b border-slate-100 pb-1">Copy <span
+                                x-text="selectedDay"></span> to:</div>
+
+                        <div class="space-y-1 mb-3 max-h-48 overflow-y-auto">
+                            <!-- Select All Option -->
+                            <label
+                                class="flex items-center gap-2 text-xs p-1.5 hover:bg-slate-50 rounded cursor-pointer font-semibold text-slate-700">
+                                <input type="checkbox"
+                                    @change="if($el.checked) targets = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].filter(d => d !== selectedDay); else targets = []"
+                                    class="rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                                <span>All Remaining Days</span>
+                            </label>
+
+                            <!-- Individual Days -->
+                            <template
+                                x-for="day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].filter(d => d !== selectedDay)">
+                                <label
+                                    class="flex items-center gap-2 text-xs p-1.5 hover:bg-slate-50 rounded cursor-pointer text-slate-600">
+                                    <input type="checkbox" :value="day" x-model="targets"
+                                        class="rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                                    <span x-text="day"></span>
+                                </label>
+                            </template>
+                        </div>
+
+                        <button
+                            @click="if(targets.length > 0) { alert(`Successfully copied ${selectedDay} schedule to: ${targets.join(', ')}`); showCopyMenu = false; targets = []; } else { alert('Please select at least one day.'); }"
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium py-2 rounded transition-colors shadow-sm">
+                            Apply Copy
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Assignments Grid -->
+            <div class="flex-1 overflow-y-auto p-6 bg-slate-50/50">
+                <div class="space-y-3">
+                    <!-- Grid Header -->
+                    <div class="grid grid-cols-12 gap-4 text-xs font-semibold text-slate-500 px-2">
+                        <div class="col-span-1">#</div>
+                        <div class="col-span-2">Time</div>
+                        <div class="col-span-3">Subject</div>
+                        <div class="col-span-3">Teacher</div>
+                        <div class="col-span-2">Type</div>
+                        <div class="col-span-1 text-right">Merge</div>
+                    </div>
+
+                    <!-- Period Rows -->
+                    <template x-for="period in periods" :key="period.number">
+                        <div
+                            class="grid grid-cols-12 gap-4 items-center bg-white p-3 rounded-lg border border-slate-200 shadow-sm hover:border-blue-200 transition-colors">
+                            <div class="col-span-1 font-bold text-slate-700" x-text="period.number"></div>
+                            <div class="col-span-2 text-xs text-slate-500 font-medium" x-text="period.time"></div>
+
+                            <!-- Subject Select -->
+                            <div class="col-span-3">
+                                <select
+                                    class="w-full text-sm border-slate-200 rounded-md bg-slate-50 focus:bg-white transition-colors">
+                                    <option value="">Select Subject</option>
+                                    <option>Mathematics</option>
+                                    <option>Science</option>
+                                    <option>English</option>
+                                </select>
+                            </div>
+
+                            <!-- Teacher Select -->
+                            <div class="col-span-3">
+                                <div class="flex items-center gap-1">
+                                    <select
+                                        class="w-full text-sm border-slate-200 rounded-md bg-slate-50 focus:bg-white transition-colors">
+                                        <option value="">Select Teacher</option>
+                                        <option>Mr. John Doe</option>
+                                        <option>Ms. Sarah Smith</option>
+                                    </select>
+                                    <a href="../user-management/index.html"
+                                        class="flex-shrink-0 w-8 h-8 flex items-center justify-center text-blue-600 bg-blue-50 hover:bg-blue-100 rounded border border-blue-200 transition-colors"
+                                        title="Add New Teacher (Go to User Management)">
+                                        <i class="fa-solid fa-user-plus text-xs"></i>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Type Checks -->
+                            <div class="col-span-2 flex items-center gap-3">
+                                <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
+                                    <input type="checkbox" :checked="period.isBreak"
+                                        @change="if($event.target.checked) { let dur = prompt('Enter break duration (mins):', '20'); if(dur) { period.isBreak = true; period.breakDuration = dur; } else { $event.target.checked = false; } } else { period.isBreak = false; }"
+                                        class="rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                                    Break
+                                </label>
+                                <span x-show="period.isBreak" class="text-xs text-slate-500"
+                                    x-text="period.breakDuration + 'm'"></span>
+                            </div>
+
+                            <!-- Merge Check -->
+                            <div class="col-span-1 flex justify-end">
+                                <label
+                                    class="flex items-center justify-center w-8 h-8 rounded hover:bg-slate-100 cursor-pointer text-slate-400 hover:text-blue-600 transition-colors"
+                                    :class="period.isMerged ? 'bg-blue-50 text-blue-600 border border-blue-200' : ''"
+                                    @click="toggleMerge(periods.indexOf(period))"
+                                    title="Merge with Next (Double Period)">
+                                    <i class="fa-solid fa-link"></i>
+                                </label>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="px-6 py-4 bg-white border-t border-slate-100 flex justify-between items-center flex-shrink-0">
+                <div class="text-xs text-slate-400">
+                    <i class="fa-solid fa-circle-info mr-1"></i> Changes auto-save to draft
+                </div>
+                <div class="flex gap-3">
+                    <button @click="assignPeriodsModal = false"
+                        class="text-slate-600 font-medium text-sm px-4 py-2">Close</button>
+                    <button @click="saveAssignments()"
+                        class="bg-blue-600 text-white font-medium text-sm px-4 py-2 rounded-lg shadow-sm hover:bg-blue-700">Save
+                        Timetable</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. UPLOAD SCHEDULE MODAL -->
+    <div x-show="uploadModal"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm"
+        style="display: none;">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden" @click.stop>
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <h3 class="font-bold text-slate-800">Upload Timetable</h3>
+                <button @click="uploadModal = false" class="text-slate-400 hover:text-slate-600"><i
+                        class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="p-4 bg-blue-50 text-blue-700 rounded-lg text-xs leading-relaxed border border-blue-100">
+                    <p class="font-semibold mb-1"><i class="fa-solid fa-circle-info mr-1"></i> File Format Instructions
+                    </p>
+                    <p>Please upload an Excel (.xlsx) file with the following exact columns:</p>
+                    <ul class="list-disc pl-4 mt-2 ruimte-y-1">
+                        <li><code>month</code> (e.g., January)</li>
+                        <li><code>day</code> (e.g., Monday) - <code>startTime</code>, <code>totalPeriod</code></li>
+                        <li><code>start</code> (09:30:00), <code>end</code> (10:20:00)</li>
+                        <li><code>subject</code>, <code>periodType</code> (Class/Break)</li>
+                        <li><code>employeeCode</code>, <code>secondEmployeeCode</code></li>
+                    </ul>
+                </div>
+
+                <div
+                    class="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center hover:bg-slate-50 transition-colors cursor-pointer relative">
+                    <input type="file" @change="handleUpload()"
+                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                    <div class="text-slate-400 mb-2"><i class="fa-solid fa-cloud-arrow-up text-3xl"></i></div>
+                    <p class="text-sm font-medium text-slate-600">Click to upload or drag and drop</p>
+                    <p class="text-xs text-slate-400 mt-1">Excel files (*.xlsx) only</p>
+                </div>
+            </div>
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+                <button @click="uploadModal = false"
+                    class="text-slate-600 font-medium text-sm px-4 py-2">Cancel</button>
+                <button @click="handleUpload()"
+                    class="bg-blue-600 text-white font-medium text-sm px-4 py-2 rounded-lg shadow-sm hover:bg-blue-700">Upload
+                    File</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. REPLICATE MODAL -->
+    <div x-show="replicateModal"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm"
+        style="display: none;">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden" @click.stop>
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <h3 class="font-bold text-slate-800">Replicate Schedule</h3>
+                <button @click="replicateModal = false" class="text-slate-400 hover:text-slate-600"><i
+                        class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-6">
+                <p class="text-sm text-slate-600 mb-4">
+                    Copy the schedule structure of <span class="font-bold">Class V (Jan)</span> to:
+                </p>
+
+                <div class="space-y-3">
+                    <!-- Option 1: Another Month -->
+                    <div class="p-3 border border-slate-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors cursor-pointer"
+                        @click="replicateSchedule('February')">
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+                                <i class="fa-regular fa-calendar"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-bold text-slate-800">Copy to Next Month</h4>
+                                <p class="text-xs text-slate-500">Create a copy for February</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Option 2: Full Year -->
+                    <div class="p-3 border border-slate-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-colors cursor-pointer"
+                        @click="replicateSchedule('year')">
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center">
+                                <i class="fa-solid fa-layer-group"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-bold text-slate-800">Copy to Full Year</h4>
+                                <p class="text-xs text-slate-500">Generate for all remaining months (Feb-Dec)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 2. DUPLICATE DAY MODAL -->
+    <div x-show="duplicateDayModal"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm"
+        style="display: none;" x-cloak>
+        <div @click.stop class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden"
+            x-transition:enter="transition ease-out duration-300 transform"
+            x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+            x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100">
+
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-copy text-indigo-500"></i> Duplicate Schedule
+                </h3>
+                <button @click="duplicateDayModal = false"
+                    class="text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-6 space-y-5">
+                <!-- Source Day -->
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 mb-2 uppercase tracking-wide">Copy schedule
+                        from</label>
+                    <div class="relative">
+                        <select x-model="duplicateSourceDay"
+                            class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm font-semibold rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 block p-3 shadow-sm appearance-none outline-none">
+                            <option value="" disabled selected>Select Source Day...</option>
+                            <template x-for="day in days" :key="day">
+                                <option :value="day" x-text="day"></option>
+                            </template>
+                        </select>
+                        <i
+                            class="fa-solid fa-chevron-down absolute right-4 top-4 text-slate-400 text-xs pointer-events-none"></i>
+                    </div>
+                </div>
+
+                <!-- Target Days (Multi Select) -->
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 mb-2 uppercase tracking-wide">Paste
+                        schedule to (Multi-Select)</label>
+                    <div
+                        class="bg-slate-50 border border-slate-200 rounded-lg shadow-sm max-h-48 overflow-y-auto divide-y divide-slate-100">
+                        <template x-for="day in days" :key="day">
+                            <label
+                                class="flex items-center p-3 cursor-pointer hover:bg-indigo-50/50 transition-colors group"
+                                x-show="day !== duplicateSourceDay">
+                                <div class="relative flex items-center max-w-full">
+                                    <input type="checkbox" :value="day" x-model="duplicateTargetDays"
+                                        class="w-4 h-4 text-indigo-600 bg-white border-slate-300 rounded focus:ring-indigo-500 focus:ring-2 cursor-pointer shadow-sm">
+                                </div>
+                                <span
+                                    class="ml-3 text-sm font-semibold text-slate-700 group-hover:text-indigo-700 transition-colors"
+                                    x-text="day"></span>
+                            </label>
+                        </template>
+                        <div x-show="!duplicateSourceDay"
+                            class="p-4 text-xs font-medium text-slate-400 text-center italic">
+                            Select a source day first to begin mapping.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
+                <button @click="duplicateDayModal = false"
+                    class="px-5 py-2 text-sm font-semibold text-slate-600 hover:text-slate-800 hover:bg-slate-200/50 rounded-lg transition-colors">
+                    Cancel
+                </button>
+                <button @click="duplicateDay()"
+                    class="px-5 py-2 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm transition-all focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    :disabled="!duplicateSourceDay || duplicateTargetDays.length === 0">
+                    Duplicate Structure
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. ADD BREAK MANUAL MODAL -->
+    <div x-show="addBreakModal"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-[2px]"
+        style="display: none;" x-cloak>
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden flex flex-col" @click.stop>
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <h3 class="font-bold text-slate-800 text-[15px] tracking-tight">Insert Break Slot</h3>
+                <button @click="addBreakModal = false"
+                    class="text-slate-400 hover:text-slate-800 w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-200 transition-colors"><i
+                        class="fa-solid fa-xmark text-sm"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Break
+                        Name</label>
+                    <input type="text" x-model="newBreakForm.name"
+                        class="w-full bg-white border border-slate-200 rounded-lg px-4 py-2.5 text-[13px] text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Duration
+                        (Mins)</label>
+                    <input type="number" x-model.number="newBreakForm.duration"
+                        class="w-full bg-white border border-slate-200 rounded-lg px-4 py-2.5 text-[13px] text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm">
+                </div>
+            </div>
+            <div class="p-5 border-t border-slate-100 bg-slate-50 flex justify-end gap-3 rounded-b-xl">
+                <button @click="confirmAddBreak()"
+                    class="px-6 py-2.5 text-[13px] font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm transition-all focus:ring-2 focus:ring-indigo-500">Insert
+                    Break</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function timetableApp() {
+            return {
+                sidebarOpen: true,
+                expandedMenu: 'academics',
+
+                // Navigation State
+                currentView: 'list',
+                viewedClass: null,
+                viewedSection: null,
+
+                // Modals
+                createScheduleModal: false,
+                replicateModal: false,
+                duplicateDayModal: false,
+                uploadModal: false,
+                assignPeriodsModal: false, // from their design mock
+                addBreakModal: false,
+
+                // Data Mock
+                session: '2024-2025',
+                selectedClass: 'Class 10',
+                selectedSection: 'Section A',
+
+                classList: [
+                    { id: 1, name: 'Class V', expanded: false, sections: [{ id: 1, name: 'A', hasTimetable: true }, { id: 2, name: 'B', hasTimetable: true }] },
+                    { id: 2, name: 'Class VI', expanded: false, sections: [{ id: 3, name: 'A', hasTimetable: true }, { id: 4, name: 'B', hasTimetable: true }] },
+                    { id: 3, name: 'Class VII', expanded: false, sections: [{ id: 5, name: 'A', hasTimetable: true }, { id: 6, name: 'B', hasTimetable: true }, { id: 7, name: 'C', hasTimetable: true }] }
+                ],
+                days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+                teachers: [
+                    { id: 1, name: 'Rahul Sharma', subject: 'Mathematics', initial: 'R', color: 'bg-indigo-400', status: 'Class 9 A', available: false },
+                    { id: 2, name: 'Anita Verma', subject: 'Science', initial: 'A', color: 'bg-emerald-400', status: 'Class 9 A', available: false },
+                    { id: 3, name: 'Vikas Gupta', subject: 'English', initial: 'V', color: 'bg-purple-400', status: 'Available', available: true },
+                    { id: 4, name: 'Priya Singh', subject: 'Social Studies', initial: 'P', color: 'bg-rose-400', status: 'Available', available: true },
+                    { id: 5, name: 'Amit Kumar', subject: 'Hindi', initial: 'A', color: 'bg-amber-500', status: 'Available', available: true }
+                ],
+
+                // Grid setup specific
+                config: {
+                    startTime: '08:00',
+                    assemblyMins: 15,
+                    periodMins: 40,
+                    numPeriods: 8,
+                    defaultBreakStart: '11:00',
+                    defaultBreakEnd: '11:20'
+                },
+                periods: [],
+                breaksInfo: [],
+                grid: {},
+
+                duplicateSourceDay: '',
+                duplicateTargetDays: [],
+
+                activeCell: null,
+                assignTab: 'class',
+                assignForm: { subject: '', examTitle: '', eventTitle: '', duration: 1 },
+                newBreakForm: { afterIndex: 0, name: 'Break', duration: 20 },
+
+                init() {
+                    this.days.forEach(d => {
+                        this.grid[d] = {};
+                    });
+                },
+
+                // Time Helpers
+                timeToMins(tStr) {
+                    const [h, m] = tStr.split(':').map(Number);
+                    return h * 60 + m;
+                },
+                minsToTime(mins) {
+                    const h = Math.floor(mins / 60);
+                    const m = mins % 60;
+                    const ampm = h >= 12 ? 'PM' : 'AM';
+                    const h12 = h % 12 || 12;
+                    return `${h12.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')} ${ampm}`;
+                },
+
+                generateGrid() {
+                    let currentMins = this.timeToMins(this.config.startTime);
+                    const newPeriods = [];
+
+                    // Assembly
+                    if (this.config.assemblyMins > 0) {
+                        newPeriods.push({
+                            id: 'assembly', type: 'assembly', name: 'Assembly',
+                            startTime: this.minsToTime(currentMins),
+                            endTime: this.minsToTime(currentMins + this.config.assemblyMins),
+                            index: -1
+                        });
+                        currentMins += this.config.assemblyMins;
+                    }
+
+                    // Check default break setting if initializing completely fresh without custom breaks overriden
+                    const breakMins = this.timeToMins(this.config.defaultBreakEnd) - this.timeToMins(this.config.defaultBreakStart);
+                    if (this.breaksInfo.length === 0 && breakMins > 0) {
+                        // approximate index where it fits, let's say after period 4
+                        this.breaksInfo.push({ afterIndex: 4, mins: breakMins, name: 'Lunch Break' });
+                    }
+
+                    for (let i = 1; i <= this.config.numPeriods; i++) {
+                        newPeriods.push({
+                            id: 'p' + i, type: 'period', name: 'Period ' + i, index: i,
+                            startTime: this.minsToTime(currentMins),
+                            endTime: this.minsToTime(currentMins + this.config.periodMins)
+                        });
+                        currentMins += this.config.periodMins;
+
+                        // Merge in breaks specifically scheduled after this period index
+                        const customBreak = this.breaksInfo.find(b => b.afterIndex === i);
+                        if (customBreak) {
+                            newPeriods.push({
+                                id: 'b' + i, type: 'break', name: customBreak.name,
+                                startTime: this.minsToTime(currentMins),
+                                endTime: this.minsToTime(currentMins + customBreak.mins),
+                                index: -1
+                            });
+                            currentMins += customBreak.mins;
+                        }
+                    }
+
+                    this.periods = newPeriods;
+
+                    // Keep grid items but make sure layout hasn't nuked days
+                    this.days.forEach(d => {
+                        if (!this.grid[d]) this.grid[d] = {};
+                    });
+                },
+
+                saveSchedule() {
+                    this.createScheduleModal = false;
+                    if (this.viewedSection) this.viewedSection.hasTimetable = true;
+                    this.generateGrid();
+                    this.currentView = 'builder';
+                },
+
+                startCreatingTimetable() {
+                    this.createScheduleModal = true;
+                },
+
+                replicateSchedule(target) {
+                    this.replicateModal = false;
+                    alert('Successfully replicated the timetable schedule structure to ' + target + '!');
+                },
+
+                goToTimetable(cls, section) {
+                    this.viewedClass = cls;
+                    this.viewedSection = section;
+                    if (section.hasTimetable) {
+                        if (this.periods.length === 0) this.generateGrid();
+                        this.currentView = 'builder';
+                    } else {
+                        this.currentView = 'empty';
+                    }
+                },
+
+                openAddBreak(index) {
+                    this.newBreakForm = { afterIndex: index, name: 'Short Break', duration: 10 };
+                    this.addBreakModal = true;
+                },
+                confirmAddBreak() {
+                    // Delete old break if overriding the exact same index, or just replace
+                    this.breaksInfo = this.breaksInfo.filter(b => b.afterIndex !== this.newBreakForm.afterIndex);
+                    this.breaksInfo.push({
+                        afterIndex: this.newBreakForm.afterIndex,
+                        name: this.newBreakForm.name,
+                        mins: this.newBreakForm.duration
+                    });
+                    this.generateGrid();
+                    this.addBreakModal = false;
+                },
+
+                openCellAssignment(day, periodId) {
+                    const existing = this.grid[day]?.[periodId];
+                    if (this.activeCell && this.activeCell.day === day && this.activeCell.periodId === periodId) {
+                        this.activeCell = null;
+                        return;
+                    }
+
+                    this.activeCell = { day, periodId };
+                    if (existing && existing.spanOwner === periodId) {
+                        this.assignTab = existing.type;
+                        this.assignForm = {
+                            subject: existing.subject || '',
+                            examTitle: existing.examTitle || '',
+                            eventTitle: existing.eventTitle || '',
+                            duration: existing.duration || 1
+                        };
+                    } else {
+                        this.assignTab = 'class';
+                        this.assignForm = { subject: '', examTitle: '', eventTitle: '', duration: 1 };
+                    }
+                },
+
+                getTeacherName(id) {
+                    const t = this.teachers.find(t => t.id === Number(id));
+                    return t ? t.name : 'Unknown';
+                },
+
+                assignType(type, teacher = null) {
+                    if (!this.activeCell) return;
+                    const { day, periodId } = this.activeCell;
+
+                    let item = { type, spanOwner: periodId, duration: 1 };
+
+                    if (type === 'class') {
+                        if (!this.assignForm.subject) { alert('Please select a subject first!'); return; }
+                        if (!teacher) return;
+                        item.subject = this.assignForm.subject;
+                        item.teacherId = teacher.id;
+                    } else if (type === 'exam') {
+                        if (!this.assignForm.examTitle) { alert('Please enter exam title'); return; }
+                        item.examTitle = this.assignForm.examTitle;
+                        item.subject = this.assignForm.subject;
+                        item.duration = this.assignForm.duration;
+                    } else if (type === 'event') {
+                        if (!this.assignForm.eventTitle) { alert('Please enter event title'); return; }
+                        item.eventTitle = this.assignForm.eventTitle;
+                        item.duration = this.assignForm.duration;
+                    }
+
+                    // Find target period
+                    const targetIdx = this.periods.findIndex(p => p.id === periodId);
+                    for (let step = 0; step < item.duration; step++) {
+                        let validPeriod = null;
+                        let foundCount = 0;
+                        // Run forward and only assign across 'period' types
+                        for (let i = targetIdx; i < this.periods.length; i++) {
+                            if (this.periods[i].type === 'period') {
+                                if (foundCount === step) {
+                                    validPeriod = this.periods[i];
+                                    break;
+                                }
+                                foundCount++;
+                            }
+                        }
+                        if (validPeriod) {
+                            this.grid[day][validPeriod.id] = { ...item };
+                        }
+                    }
+
+                    this.activeCell = null;
+                },
+
+                clearCell(day, periodId) {
+                    const item = this.grid[day]?.[periodId];
+                    if (!item) return;
+                    const ownerId = item.spanOwner;
+                    for (const pId in this.grid[day]) {
+                        if (this.grid[day][pId] && this.grid[day][pId].spanOwner === ownerId) {
+                            this.grid[day][pId] = null;
+                        }
+                    }
+                    if (this.activeCell?.day === day && this.activeCell?.periodId === periodId) this.activeCell = null;
+                },
+
+                isSpannedOver(day, period) {
+                    const item = this.grid[day]?.[period.id];
+                    return item && item.spanOwner !== period.id;
+                },
+
+                getSpanStyle(day, periodId) {
+                    const item = this.grid[day]?.[periodId];
+                    if (!item || item.spanOwner !== periodId || !item.duration || item.duration <= 1) {
+                        return 'top: 6px; bottom: 6px; left: 8px; right: 8px; z-index: 20;'; // Default single period span
+                    }
+
+                    let targetIdx = this.periods.findIndex(p => p.id === periodId);
+                    let foundClassPeriods = 0;
+                    let heightPx = 0;
+
+                    for (let i = targetIdx; i < this.periods.length; i++) {
+                        if (this.periods[i].type === 'period') {
+                            foundClassPeriods++;
+                            heightPx += 88; // h-[88px] mapping
+                        } else if (this.periods[i].type === 'break' || this.periods[i].type === 'assembly') {
+                            if (foundClassPeriods < item.duration && foundClassPeriods > 0) {
+                                heightPx += 48; // h-12 height mapping
+                            }
+                        }
+                        if (foundClassPeriods === item.duration) break;
+                    }
+                    return `top: 6px; left: 8px; right: 8px; height: calc(${heightPx}px - 12px); z-index: 20;`;
+                },
+
+                duplicateDay() {
+                    if (!this.duplicateSourceDay) { alert('Select a source day'); return; }
+                    if (this.duplicateTargetDays.length === 0) { alert('Select at least one target day'); return; }
+
+                    this.duplicateTargetDays.forEach(targetDay => {
+                        for (let pid in this.grid[this.duplicateSourceDay]) {
+                            const obj = this.grid[this.duplicateSourceDay][pid];
+                            this.grid[targetDay][pid] = obj ? { ...obj } : null;
+                        }
+                    });
+
+                    this.duplicateDayModal = false;
+                    this.duplicateSourceDay = '';
+                    this.duplicateTargetDays = [];
+                    alert('Schedule successfully duplicated!');
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>

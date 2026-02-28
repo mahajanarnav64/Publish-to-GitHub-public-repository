@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fee Heads Management | Hybrid School ERP</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+            color: #111827;
+        }
+
+        /* Narrow Rail Styles */
+        .sidebar-rail {
+            background-color: #ffffff;
+            border-right: 1px solid #f1f5f9;
+            color: #64748b;
+            z-index: 50;
+        }
+
+        .sidebar-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 0;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            width: 100%;
+        }
+
+        .sidebar-item:hover {
+            color: #3b82f6;
+            background-color: #f8fafc;
+        }
+
+        .sidebar-item.active {
+            color: #2563eb;
+            background-color: #eff6ff;
+        }
+
+        .sidebar-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background-color: #2563eb;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .sidebar-icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-label {
+            font-size: 11px;
+            text-align: center;
+            line-height: 1.2;
+            font-weight: 600;
+        }
+
+        /* Custom Toggle Switch */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #10B981;
+        }
+
+        .toggle-checkbox:checked+.toggle-label {
+            background-color: #10B981;
+        }
+    </style>
+</head>
+
+<body x-data="feeHeadsApp()" class="flex h-screen overflow-hidden">
+
+    <!-- NARROW RAIL SIDEBAR -->
+    <aside class="sidebar-rail w-[84px] flex flex-col flex-shrink-0 z-50 h-full shadow-sm relative">
+        <!-- Logo -->
+        <div class="h-[76px] flex items-center justify-center border-b border-slate-100 flex-shrink-0">
+            <div
+                class="w-11 h-11 bg-[#2563eb] rounded-xl flex items-center justify-center text-white font-extrabold text-2xl shadow-sm">
+                H
+            </div>
+        </div>
+
+        <!-- Getting Started -->
+        <div class="px-3 mb-5 mt-4">
+            <button
+                class="w-full py-3.5 bg-[#eff6ff] text-[#2563eb] hover:bg-blue-100 rounded-2xl flex flex-col items-center justify-center transition-colors border border-blue-100/50 shadow-sm">
+                <i class="fa-solid fa-rocket text-[17px] mb-1.5"></i>
+                <span class="text-[10px] font-bold text-center leading-tight">Quick<br>Start</span>
+            </button>
+        </div>
+
+        <!-- Nav Items -->
+        <nav class="flex-1 pb-4 overflow-y-auto scrollbar-hide flex flex-col items-center">
+            <a href="../index.html" class="sidebar-item">
+                <i class="fa-solid fa-gauge-high sidebar-icon"></i><span class="sidebar-label">Home</span>
+            </a>
+            <a href="#" class="sidebar-item">
+                <i class="fa-solid fa-bell-concierge sidebar-icon"></i><span
+                    class="sidebar-label">Front<br>Office</span>
+            </a>
+            <a href="#" class="sidebar-item">
+                <i class="fa-solid fa-user-plus sidebar-icon"></i><span class="sidebar-label">Admit</span>
+            </a>
+            <a href="#" class="sidebar-item">
+                <i class="fa-solid fa-graduation-cap sidebar-icon"></i><span class="sidebar-label">Student</span>
+            </a>
+            <a href="../index.html?module=academics" class="sidebar-item">
+                <i class="fa-solid fa-book-open sidebar-icon"></i><span class="sidebar-label">Academia</span>
+            </a>
+
+            <a href="#" class="sidebar-item">
+                <i class="fa-solid fa-users-gear sidebar-icon"></i><span class="sidebar-label">HR</span>
+            </a>
+            <a href="#" class="sidebar-item active">
+                <i class="fa-solid fa-coins sidebar-icon"></i><span class="sidebar-label">Finance</span>
+            </a>
+        </nav>
+
+        <div class="mt-auto pb-6 pt-4 border-t border-slate-100 flex-shrink-0">
+            <a href="#" class="sidebar-item !py-2">
+                <i class="fa-solid fa-gear sidebar-icon"></i><span class="sidebar-label">Config</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden relative bg-gray-50">
+
+        <!-- CONTENT AREA -->
+        <div class="flex-1 overflow-y-auto p-8">
+
+            <!-- Page Title Area -->
+            <div class="flex justify-between items-start mb-6">
+                <div class="flex items-center gap-4">
+                    <a href="index.html"
+                        class="flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition-colors tooltip"
+                        title="Back to Finance Home">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </a>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">Fee Heads Master</h1>
+                        <p class="text-gray-500 text-sm mt-1">Manage reusable fee components for your institution</p>
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    <button @click="openModal()"
+                        class="px-5 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-bold hover:bg-blue-700 shadow-sm flex items-center gap-2 transition-colors">
+                        <i class="fa-solid fa-plus"></i> Add Fee Head
+                    </button>
+                </div>
+            </div>
+
+            <!-- Middle Section: Search & Actions -->
+            <div
+                class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-6 flex justify-between items-center gap-4">
+                <div class="relative w-full max-w-md">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fa-solid fa-magnifying-glass text-gray-400"></i>
+                    </div>
+                    <input type="text" x-model="searchQuery" placeholder="Search fee heads by name..."
+                        class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 outline-none transition-all">
+                </div>
+                <!-- Status Filter -->
+                <div class="flex items-center gap-2">
+                    <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Filter Status:</label>
+                    <select x-model="filterStatus"
+                        class="bg-white border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2 outline-none cursor-pointer">
+                        <option value="All">All</option>
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Fee Heads Table -->
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden min-h-[400px]">
+                <table class="w-full text-sm text-left text-gray-500">
+                    <thead class="text-xs text-gray-500 uppercase bg-gray-50 border-b border-gray-100">
+                        <tr>
+                            <th class="px-6 py-4 font-bold">Fee Head Name</th>
+                            <th class="px-6 py-4 font-bold">Type</th>
+                            <th class="px-6 py-4 font-bold">Description</th>
+                            <th class="px-6 py-4 font-bold">Created Date</th>
+                            <th class="px-6 py-4 font-bold text-center">Status</th>
+                            <th class="px-6 py-4 font-bold text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        <template x-for="head in filteredFeeHeads" :key="head.id">
+                            <tr class="hover:bg-gray-50 transition-colors group">
+                                <td class="px-6 py-4 font-bold text-gray-900" x-text="head.name"></td>
+                                <td class="px-6 py-4">
+                                    <span
+                                        class="px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-600"
+                                        x-text="head.type"></span>
+                                </td>
+                                <td class="px-6 py-4 text-gray-600" x-text="head.description || '--'"></td>
+                                <td class="px-6 py-4 text-gray-500 font-medium" x-text="head.created_at"></td>
+                                <td class="px-6 py-4 text-center">
+                                    <button @click="toggleStatus(head)"
+                                        class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider w-20 text-center transition-colors border"
+                                        :class="head.status === 'Active' ? 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100' : 'bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100'"
+                                        x-text="head.status"></button>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <button @click="editHead(head)"
+                                        class="text-gray-400 hover:text-blue-600 transition-colors p-2 rounded-lg hover:bg-blue-50"
+                                        title="Edit Fee Head">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </template>
+                        <!-- Empty State -->
+                        <tr x-show="filteredFeeHeads.length === 0" x-cloak>
+                            <td colspan="6" class="px-6 py-16 text-center text-gray-400">
+                                <div class="flex flex-col items-center">
+                                    <div
+                                        class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4 border border-gray-100">
+                                        <i class="fa-solid fa-file-invoice-dollar text-2xl text-gray-300"></i>
+                                    </div>
+                                    <p class="font-semibold text-gray-500">No Fee Heads Found</p>
+                                    <p class="text-xs mt-1">Adjust your search or add a new fee head to get started.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- ADD/EDIT MODAL -->
+    <div x-show="isModalOpen" x-cloak
+        class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md flex flex-col transform transition-all" @click.stop>
+
+            <!-- Modal Header -->
+            <div
+                class="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-xl shrink-0">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900"
+                        x-text="modalMode === 'add' ? 'Add Fee Head' : 'Edit Fee Head'"></h3>
+                </div>
+                <button @click="closeModal()"
+                    class="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-200 transition-colors shadow-sm"><i
+                        class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-6">
+                <!-- Name Field -->
+                <div class="mb-5">
+                    <label class="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Fee Head Name
+                        <span class="text-red-500">*</span></label>
+                    <input type="text" x-model="form.name" placeholder="E.g. Admission Fee"
+                        class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all">
+                    <p x-show="errors.name" class="text-red-500 text-xs mt-1.5 font-medium" x-text="errors.name"></p>
+                </div>
+
+                <!-- Type Field -->
+                <div class="mb-5">
+                    <label class="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Fee Type <span
+                            class="text-red-500">*</span></label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="cursor-pointer border rounded-lg p-3 flex items-center gap-2 transition-colors"
+                            :class="form.type === 'one-time' ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'">
+                            <input type="radio" value="one-time" x-model="form.type" class="hidden">
+                            <span class="w-4 h-4 rounded-full border flex items-center justify-center"
+                                :class="form.type === 'one-time' ? 'border-blue-500' : 'border-gray-300'">
+                                <span class="w-2 h-2 rounded-full bg-blue-500" x-show="form.type === 'one-time'"></span>
+                            </span>
+                            <span class="text-sm font-bold">One-Time</span>
+                        </label>
+                        <label class="cursor-pointer border rounded-lg p-3 flex items-center gap-2 transition-colors"
+                            :class="form.type === 'recurring' ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'">
+                            <input type="radio" value="recurring" x-model="form.type" class="hidden">
+                            <span class="w-4 h-4 rounded-full border flex items-center justify-center"
+                                :class="form.type === 'recurring' ? 'border-blue-500' : 'border-gray-300'">
+                                <span class="w-2 h-2 rounded-full bg-blue-500"
+                                    x-show="form.type === 'recurring'"></span>
+                            </span>
+                            <span class="text-sm font-bold">Recurring</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Description Field -->
+                <div class="mb-5">
+                    <label class="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Description
+                        <span class="text-gray-400 font-normal">(Optional)</span></label>
+                    <textarea x-model="form.description" rows="3" placeholder="Enter details..."
+                        class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all resize-none"></textarea>
+                </div>
+
+                <!-- Status Toggle -->
+                <div class="flex items-center justify-between bg-gray-50 p-4 rounded-lg border border-gray-100">
+                    <div>
+                        <p class="text-sm font-bold text-gray-800">Active Status</p>
+                        <p class="text-xs text-gray-500 mt-0.5"
+                            x-text="form.status === 'Active' ? 'Available for use in fee structures' : 'Hidden from fee structure creation'">
+                        </p>
+                    </div>
+                    <label class="flex items-center cursor-pointer">
+                        <div class="relative">
+                            <input type="checkbox" x-model="form.isActive" class="sr-only">
+                            <div class="block bg-gray-200 w-10 h-6 rounded-full transition-colors"
+                                :class="form.isActive ? 'bg-blue-500' : 'bg-gray-300'"></div>
+                            <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform"
+                                :class="form.isActive ? 'transform translate-x-4' : ''"></div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3 rounded-b-xl shrink-0">
+                <button @click="closeModal()"
+                    class="px-5 py-2.5 text-sm text-gray-600 font-bold hover:bg-gray-200 rounded-lg transition-colors">Cancel</button>
+                <button @click="saveFeeHead()"
+                    class="px-6 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-bold hover:bg-blue-700 shadow-md shadow-blue-200 transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-check"></i> Save Fee Head
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Toast Notification (Alpine Portals/Absolute) -->
+    <div x-show="toast.show" x-transition.opacity.duration.300ms x-cloak
+        class="fixed bottom-6 right-6 px-5 py-3 rounded-lg shadow-xl text-sm font-bold flex items-center gap-3 z-50 transform"
+        :class="toast.type === 'success' ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'">
+        <i class="fa-solid" :class="toast.type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation'"></i>
+        <span x-text="toast.message"></span>
+    </div>
+
+    <script>
+        function feeHeadsApp() {
+            return {
+                searchQuery: '',
+                filterStatus: 'All',
+                isModalOpen: false,
+                modalMode: 'add', // 'add' or 'edit'
+                toast: { show: false, message: '', type: 'success' },
+
+                form: {
+                    id: null,
+                    name: '',
+                    type: 'one-time',
+                    description: '',
+                    status: 'Active',
+                    isActive: true
+                },
+
+                errors: {
+                    name: null
+                },
+
+                feeHeads: [
+                    { id: 'fh_001', name: 'Admission Fee', type: 'one-time', description: 'One time fee collected during fresh admission', status: 'Active', created_at: '01 Jan 2026' },
+                    { id: 'fh_002', name: 'Tuition Fee', type: 'recurring', description: 'Standard tuition fee', status: 'Active', created_at: '01 Jan 2026' },
+                    { id: 'fh_003', name: 'Annual Charges', type: 'recurring', description: 'Yearly maintenance and operations fee', status: 'Active', created_at: '05 Jan 2026' },
+                    { id: 'fh_004', name: 'Examination Fee', type: 'recurring', description: 'Term examination processing fee', status: 'Active', created_at: '10 Jan 2026' },
+                    { id: 'fh_005', name: 'Library Fee', type: 'recurring', description: 'Library usage and maintenance', status: 'Active', created_at: '12 Jan 2026' },
+                    { id: 'fh_006', name: 'Transport Fee', type: 'recurring', description: 'Bus transport across zones', status: 'Inactive', created_at: '15 Jan 2026' },
+                    { id: 'fh_007', name: 'Sports Fee', type: 'recurring', description: '', status: 'Active', created_at: '20 Jan 2026' },
+                    { id: 'fh_008', name: 'Security Deposit (Refundable)', type: 'one-time', description: 'Refunded at the time of leaving school', status: 'Active', created_at: '22 Jan 2026' }
+                ],
+
+                get filteredFeeHeads() {
+                    return this.feeHeads.filter(head => {
+                        const matchesSearch = head.name.toLowerCase().includes(this.searchQuery.toLowerCase());
+                        const matchesStatus = this.filterStatus === 'All' || head.status === this.filterStatus;
+                        return matchesSearch && matchesStatus;
+                    });
+                },
+
+                openModal() {
+                    this.modalMode = 'add';
+                    this.resetForm();
+                    this.isModalOpen = true;
+                },
+
+                closeModal() {
+                    this.isModalOpen = false;
+                    this.resetForm();
+                },
+
+                resetForm() {
+                    this.form = { id: null, name: '', type: 'one-time', description: '', status: 'Active', isActive: true };
+                    this.errors = { name: null };
+                },
+
+                editHead(head) {
+                    this.modalMode = 'edit';
+                    this.form = {
+                        id: head.id,
+                        name: head.name,
+                        type: head.type,
+                        description: head.description,
+                        status: head.status,
+                        isActive: head.status === 'Active'
+                    };
+                    this.errors = { name: null };
+                    this.isModalOpen = true;
+                },
+
+                toggleStatus(head) {
+                    head.status = head.status === 'Active' ? 'Inactive' : 'Active';
+                    this.showToast(`${head.name} is now ${head.status}`, 'success');
+                },
+
+                saveFeeHead() {
+                    // Validation
+                    this.errors.name = null;
+                    if (!this.form.name.trim()) {
+                        this.errors.name = "Fee Head Name is required";
+                        return;
+                    }
+
+                    // Mock Duplicate Check
+                    const isDuplicate = this.feeHeads.some(h => h.name.toLowerCase() === this.form.name.toLowerCase() && h.id !== this.form.id);
+                    if (isDuplicate) {
+                        this.errors.name = "This Fee Head name already exists";
+                        return;
+                    }
+
+                    this.form.status = this.form.isActive ? 'Active' : 'Inactive';
+
+                    if (this.modalMode === 'add') {
+                        // Create
+                        const newHead = {
+                            id: 'fh_' + Math.floor(Math.random() * 1000),
+                            name: this.form.name,
+                            type: this.form.type,
+                            description: this.form.description,
+                            status: this.form.status,
+                            created_at: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+                        };
+                        this.feeHeads.unshift(newHead);
+                        this.showToast('Fee Head created successfully', 'success');
+                    } else {
+                        // Update
+                        const index = this.feeHeads.findIndex(h => h.id === this.form.id);
+                        if (index !== -1) {
+                            this.feeHeads[index].name = this.form.name;
+                            this.feeHeads[index].type = this.form.type;
+                            this.feeHeads[index].description = this.form.description;
+                            this.feeHeads[index].status = this.form.status;
+                            this.showToast('Fee Head updated successfully', 'success');
+                        }
+                    }
+
+                    this.closeModal();
+                },
+
+                showToast(message, type = 'success') {
+                    this.toast.message = message;
+                    this.toast.type = type;
+                    this.toast.show = true;
+                    setTimeout(() => {
+                        this.toast.show = false;
+                    }, 3000);
+                }
+            };
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hybrid School - ERP Dashboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Narrow Rail Styles */
+        .sidebar-rail {
+            background-color: #ffffff;
+            border-right: 1px solid #f1f5f9;
+            color: #64748b;
+            z-index: 50;
+        }
+
+        .sidebar-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 0;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            width: 100%;
+        }
+
+        .sidebar-item:hover {
+            color: #3b82f6;
+            background-color: #f8fafc;
+        }
+
+        .sidebar-item.active {
+            color: #2563eb;
+            background-color: #eff6ff;
+        }
+
+        .sidebar-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background-color: #2563eb;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .sidebar-icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-label {
+            font-size: 11px;
+            text-align: center;
+            line-height: 1.2;
+            font-weight: 600;
+        }
+
+        /* App Header */
+        .app-header {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e5e7eb;
+            color: #334155;
+        }
+
+        .header-search {
+            background-color: #f1f5f9;
+            color: #334155;
+            border: 1px solid #e2e8f0;
+        }
+
+        .header-search::placeholder {
+            color: #94a3b8;
+        }
+
+        .header-search:focus {
+            background-color: white;
+            border-color: #3b82f6;
+        }
+
+        /* Secondary Navigation (Horizontal Tabs) */
+        .sub-nav-bar {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 0 1.5rem;
+            display: flex;
+            align-items: center;
+            height: 48px;
+            gap: 2rem;
+            overflow-x: auto;
+        }
+
+        .sub-nav-link {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #64748b;
+            padding: 13px 0;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .sub-nav-link:hover {
+            color: #334155;
+        }
+
+        .sub-nav-link.active {
+            color: #2563eb;
+            border-bottom-color: #2563eb;
+        }
+
+        .dashboard-card {
+            background-color: white;
+            border-radius: 1rem;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .dashboard-card:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .sticky-column {
+            position: sticky;
+            top: 1.5rem;
+            height: fit-content;
+        }
+    </style>
+
+
+</head>
+
+<body x-data="{ 
+    currentModule: 'academics', 
+    activeTab: 'overview',
+    userRole: 'admin',
+    setModule(module, defaultTab = 'overview') {
+        this.currentModule = module;
+        this.activeTab = defaultTab;
+    },
+    init() {
+        const params = new URLSearchParams(window.location.search);
+        if(params.has('role')) {
+            this.userRole = params.get('role');
+        }
+    }
+}" class="flex h-screen overflow-hidden text-slate-700">
+
+    <!-- 1. NARROW RAIL SIDEBAR -->
+    <aside class="sidebar-rail w-[84px] flex flex-col flex-shrink-0 z-50 h-full shadow-sm relative">
+
+        <!-- Logo -->
+        <div class="h-[76px] flex items-center justify-center border-b border-slate-100 flex-shrink-0">
+            <div
+                class="w-11 h-11 bg-[#2563eb] rounded-xl flex items-center justify-center text-white font-extrabold text-2xl shadow-sm">
+                H</div>
+        </div>
+
+        <!-- Getting Started -->
+        <div class="px-3 mb-5 mt-4">
+            <button
+                class="w-full py-3.5 bg-[#eff6ff] text-[#2563eb] hover:bg-blue-100 rounded-2xl flex flex-col items-center justify-center transition-colors border border-blue-100/50 shadow-sm">
+                <i class="fa-solid fa-rocket text-[17px] mb-1.5"></i>
+                <span class="text-[10px] font-bold text-center leading-tight">Quick<br>Start</span>
+            </button>
+        </div>
+
+        <!-- Nav Items -->
+        <a href="../index.html" class="sidebar-item">
+            <i class="fa-solid fa-gauge-high sidebar-icon"></i><span class="sidebar-label">Home</span>
+        </a>
+
+        <a href="#" class="sidebar-item" :class="currentModule === 'front_office' ? 'active' : ''"
+            @click.prevent="setModule('front_office')">
+            <i class="fa-solid fa-bell-concierge sidebar-icon"></i><span class="sidebar-label">Front<br>Office</span>
+        </a>
+
+        <a href="#" class="sidebar-item" :class="currentModule === 'admissions' ? 'active' : ''"
+            @click.prevent="setModule('admissions')">
+            <i class="fa-solid fa-user-plus sidebar-icon"></i><span class="sidebar-label">Admit</span>
+        </a>
+
+        <a href="#" class="sidebar-item" :class="currentModule === 'students' ? 'active' : ''"
+            @click.prevent="setModule('students')">
+            <i class="fa-solid fa-graduation-cap sidebar-icon"></i><span class="sidebar-label">Student</span>
+        </a>
+
+        <a href="../index.html?module=academics" class="sidebar-item active"><i
+                class="fa-solid fa-book-open sidebar-icon"></i><span class="sidebar-label">Academia</span></a>
+
+
+
+        <a href="#" class="sidebar-item" :class="currentModule === 'hr' ? 'active' : ''"
+            @click.prevent="setModule('hr')" x-show="userRole !== 'teacher'">
+            <i class="fa-solid fa-users-gear sidebar-icon"></i><span class="sidebar-label">HR</span>
+        </a>
+
+        <a href="../finance/index.html" class="sidebar-item">
+            <i class="fa-solid fa-coins sidebar-icon"></i><span class="sidebar-label">Finance</span>
+        </a>
+
+        <div class="mt-auto pb-6 pt-4 border-t border-slate-100 flex-shrink-0">
+            <a href="../index.html?module=settings" id="nav-settings" class="sidebar-item !py-2"
+                x-show="userRole !== 'teacher'">
+                <i class="fa-solid fa-gear sidebar-icon"></i><span class="sidebar-label">Settings</span>
+            </a>
+        </div>
+    </aside>
+
+
+
+    <!-- MAIN CONTENT -->
+    <div class="flex-1 flex flex-col h-full overflow-hidden relative">
+
+        <!-- HEADER -->
+        <header class="h-16 flex items-center justify-between px-8 bg-[#f8f9fc] flex-shrink-0">
+            <!-- Left: Module Title -->
+            <div class="w-1/4">
+                <h1 class="text-[17px] font-bold text-slate-800 tracking-tight">Academics</h1>
+            </div>
+
+            <!-- Middle: Search -->
+            <div class="flex-1 flex justify-center">
+                <div class="relative w-full max-w-lg">
+                    <i
+                        class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 text-sm"></i>
+                    <input type="text" placeholder="Search modules, students, report"
+                        class="h-10 w-full bg-white rounded-full pl-10 pr-4 text-[13px] text-slate-600 border border-slate-200 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] focus:outline-none focus:ring-2 focus:ring-orange-100 focus:border-orange-300 transition-all placeholder:text-slate-300">
+                </div>
+            </div>
+
+            <!-- Right: Profile & Notifications -->
+            <div class="w-1/4 flex items-center justify-end gap-5">
+                <!-- Bell -->
+                <button class="relative text-slate-400 hover:text-slate-600 transition-colors">
+                    <i class="fa-regular fa-bell text-lg"></i>
+                    <span
+                        class="absolute top-0 right-0 w-2 h-2 bg-red-500 border-2 border-[#f8f9fc] rounded-full"></span>
+                </button>
+
+                <!-- Profile -->
+                <div class="flex items-center gap-2.5 cursor-pointer">
+                    <div
+                        class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-[11px] shadow-sm">
+                        JD
+                    </div>
+                    <div class="flex flex-col hidden sm:flex">
+                        <span class="text-[13px] font-semibold text-slate-700 leading-tight">John Doe</span>
+                        <span class="text-[10px] text-slate-400 font-medium leading-tight">Admin</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 ml-1"></i>
+                </div>
+            </div>
+        </header>
+        <!-- DASHBOARD GRID CONTENT -->
+        <main class="flex-1 flex overflow-hidden">
+
+            <!-- Left: Module Cards -->
+            <div class="flex-1 overflow-y-auto p-8 pt-4 scrollbar-hide flex-col">
+                <p class="text-[13px] text-slate-400 mb-6 font-medium">Manage all academics related operations from
+                    here.
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                    <!-- Card 1: Timetable -->
+                    <a href="timetable.html"
+                        class="bg-white rounded-[1.25rem] p-5 card-shadow card-hover flex flex-col h-[180px]">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500 mb-4 shadow-sm border border-orange-100/50">
+                            <i class="fa-regular fa-clock"></i>
+                        </div>
+                        <h3 class="font-bold text-[15px] text-slate-800 tracking-tight">Timetable</h3>
+                        <p class="text-xs text-slate-400 mt-1.5 flex-1">Create and manage timetables</p>
+
+                        <div class="flex justify-between items-center mt-4">
+                            <span
+                                class="text-[11px] font-bold text-sky-500 bg-sky-50 px-3 py-1 rounded-full">Open</span>
+                            <span class="text-[10px] text-slate-300 font-medium">1 hour ago</span>
+                        </div>
+                    </a>
+
+                    <!-- Card 2: Exams -->
+                    <a href="#" class="bg-white rounded-[1.25rem] p-5 card-shadow card-hover flex flex-col h-[180px]">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-500 mb-4 shadow-sm border border-indigo-100/50">
+                            <i class="fa-solid fa-file-pen"></i>
+                        </div>
+                        <h3 class="font-bold text-[15px] text-slate-800 tracking-tight">Exams</h3>
+                        <p class="text-xs text-slate-400 mt-1.5 flex-1">Configure exam cycles and marks</p>
+
+                        <div class="flex justify-between items-center mt-4">
+                            <span
+                                class="text-[11px] font-bold text-indigo-500 bg-indigo-50 px-3 py-1 rounded-full">Manage</span>
+                            <span class="text-[10px] text-slate-300 font-medium">Tomorrow</span>
+                        </div>
+                    </a>
+
+                    <!-- Card 3: Syllabus Planner -->
+                    <a href="syllabus.html"
+                        class="bg-white rounded-[1.25rem] p-5 card-shadow card-hover flex flex-col h-[180px]">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center text-purple-500 mb-4 shadow-sm border border-purple-100/50">
+                            <i class="fa-solid fa-list-check"></i>
+                        </div>
+                        <h3 class="font-bold text-[15px] text-slate-800 tracking-tight">Syllabus Planner</h3>
+                        <p class="text-xs text-slate-400 mt-1.5 flex-1">Design and track syllabus progress</p>
+
+                        <div class="flex justify-between items-center mt-4">
+                            <span
+                                class="text-[11px] font-bold text-purple-500 bg-purple-50 px-3 py-1 rounded-full">Plan</span>
+                            <span class="text-[10px] text-slate-300 font-medium">1 day ago</span>
+                        </div>
+                    </a>
+
+                </div>
+            </div>
+
+        </main>
+
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,395 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hybrid School - ERP Dashboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Narrow Rail Styles */
+        .sidebar-rail {
+            background-color: #ffffff;
+            border-right: 1px solid #f1f5f9;
+            color: #64748b;
+            z-index: 50;
+        }
+
+        .sidebar-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 0;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            width: 100%;
+        }
+
+        .sidebar-item:hover {
+            color: #3b82f6;
+            background-color: #f8fafc;
+        }
+
+        .sidebar-item.active {
+            color: #2563eb;
+            background-color: #eff6ff;
+        }
+
+        .sidebar-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background-color: #2563eb;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .sidebar-icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-label {
+            font-size: 11px;
+            text-align: center;
+            line-height: 1.2;
+            font-weight: 600;
+        }
+
+        /* Card Styles */
+        .card-shadow {
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+            border: 1px solid #e5e7eb;
+        }
+
+        .card-hover {
+            transition: all 0.2s;
+        }
+
+        .card-hover:hover {
+            box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+        }
+    </style>
+
+</head>
+
+<body x-data="{ 
+    currentModule: 'finance', 
+    activeTab: 'overview',
+    userRole: 'admin',
+    setModule(module, defaultTab = 'overview') {
+        this.currentModule = module;
+        this.activeTab = defaultTab;
+    },
+    init() {
+        const params = new URLSearchParams(window.location.search);
+        if(params.has('role')) {
+            this.userRole = params.get('role');
+        }
+    }
+}" class="flex h-screen overflow-hidden text-slate-700">
+
+    <!-- 1. NARROW RAIL SIDEBAR -->
+    <aside class="sidebar-rail w-[84px] flex flex-col flex-shrink-0 z-50 h-full shadow-sm relative">
+
+        <!-- Logo -->
+        <div class="h-[76px] flex items-center justify-center border-b border-slate-100 flex-shrink-0">
+            <div
+                class="w-11 h-11 bg-[#2563eb] rounded-xl flex items-center justify-center text-white font-extrabold text-2xl shadow-sm">
+                H</div>
+        </div>
+
+        <!-- Getting Started -->
+        <div class="px-3 mb-5 mt-4">
+            <button
+                class="w-full py-3.5 bg-[#eff6ff] text-[#2563eb] hover:bg-blue-100 rounded-2xl flex flex-col items-center justify-center transition-colors border border-blue-100/50 shadow-sm">
+                <i class="fa-solid fa-rocket text-[17px] mb-1.5"></i>
+                <span class="text-[10px] font-bold text-center leading-tight">Quick<br>Start</span>
+            </button>
+        </div>
+
+        <!-- Nav Items -->
+        <a href="../index.html" class="sidebar-item">
+            <i class="fa-solid fa-gauge-high sidebar-icon"></i><span class="sidebar-label">Home</span>
+        </a>
+
+        <a href="#" class="sidebar-item" :class="currentModule === 'front_office' ? 'active' : ''"
+            @click.prevent="setModule('front_office')">
+            <i class="fa-solid fa-bell-concierge sidebar-icon"></i><span class="sidebar-label">Front<br>Office</span>
+        </a>
+
+        <a href="#" class="sidebar-item" :class="currentModule === 'admissions' ? 'active' : ''"
+            @click.prevent="setModule('admissions')">
+            <i class="fa-solid fa-user-plus sidebar-icon"></i><span class="sidebar-label">Admit</span>
+        </a>
+
+        <a href="#" class="sidebar-item" :class="currentModule === 'students' ? 'active' : ''"
+            @click.prevent="setModule('students')">
+            <i class="fa-solid fa-graduation-cap sidebar-icon"></i><span class="sidebar-label">Student</span>
+        </a>
+
+        <a href="../index.html?module=academics" class="sidebar-item">
+            <i class="fa-solid fa-book-open sidebar-icon"></i><span class="sidebar-label">Academia</span>
+        </a>
+
+
+
+        <a href="#" class="sidebar-item" :class="currentModule === 'hr' ? 'active' : ''"
+            @click.prevent="setModule('hr')" x-show="userRole !== 'teacher'">
+            <i class="fa-solid fa-users-gear sidebar-icon"></i><span class="sidebar-label">HR</span>
+        </a>
+
+        <a href="index.html" class="sidebar-item active">
+            <i class="fa-solid fa-coins sidebar-icon"></i><span class="sidebar-label">Finance</span>
+        </a>
+
+        <div class="mt-auto pb-6 pt-4 border-t border-slate-100 flex-shrink-0">
+            <a href="../index.html?module=settings" id="nav-settings" class="sidebar-item !py-2"
+                x-show="userRole !== 'teacher'">
+                <i class="fa-solid fa-gear sidebar-icon"></i><span class="sidebar-label">Settings</span>
+            </a>
+        </div>
+    </aside>
+
+
+
+    <!-- MAIN CONTENT -->
+    <div class="flex-1 flex flex-col h-full overflow-hidden relative">
+
+        <!-- HEADER -->
+        <header class="h-16 flex items-center justify-between px-8 bg-[#f8f9fc] flex-shrink-0">
+            <!-- Left: Module Title -->
+            <div class="w-1/4">
+                <h1 class="text-[17px] font-bold text-slate-800 tracking-tight">Finance</h1>
+            </div>
+
+            <!-- Middle: Search -->
+            <div class="flex-1 flex justify-center">
+                <div class="relative w-full max-w-lg">
+                    <i
+                        class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 text-sm"></i>
+                    <input type="text" placeholder="Search modules, students, report"
+                        class="h-10 w-full bg-white rounded-full pl-10 pr-4 text-[13px] text-slate-600 border border-slate-200 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-300 transition-all placeholder:text-slate-300">
+                </div>
+            </div>
+
+            <!-- Right: Profile & Notifications -->
+            <div class="w-1/4 flex items-center justify-end gap-5">
+                <!-- Bell -->
+                <button class="relative text-slate-400 hover:text-slate-600 transition-colors">
+                    <i class="fa-regular fa-bell text-lg"></i>
+                    <span
+                        class="absolute top-0 right-0 w-2 h-2 bg-red-500 border-2 border-[#f8f9fc] rounded-full"></span>
+                </button>
+
+                <!-- Profile -->
+                <div class="flex items-center gap-2.5 cursor-pointer">
+                    <div
+                        class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-[11px] shadow-sm">
+                        JD
+                    </div>
+                    <div class="flex flex-col hidden sm:flex">
+                        <span class="text-[13px] font-semibold text-slate-700 leading-tight">John Doe</span>
+                        <span class="text-[10px] text-slate-400 font-medium leading-tight">Admin</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 ml-1"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- DASHBOARD GRID CONTENT -->
+        <main class="flex-1 flex overflow-hidden">
+
+            <!-- Left: Module Cards -->
+            <div class="flex-1 overflow-y-auto p-8 pt-4 scrollbar-hide flex-col">
+                <p class="text-[13px] text-slate-400 mb-6 font-medium">Manage all finance related operations from
+                    here.
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+
+                    <!-- Card 1: Fee Collection & Receipts -->
+                    <a href="fee-collection.html"
+                        class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 group flex flex-col h-full">
+                        <div
+                            class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-6 transition-colors group-hover:bg-emerald-600 group-hover:text-white">
+                            <i class="fa-solid fa-hand-holding-dollar text-xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-slate-900 text-base mb-1">Fee Collection</h3>
+                            <p class="text-[11px] text-slate-500 leading-relaxed mb-6">Record payments and manage
+                                receipts.</p>
+                        </div>
+                        <div class="flex items-center justify-between mt-auto">
+                            <div
+                                class="px-5 py-2 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-all capitalize">
+                                Collect
+                            </div>
+                            <span class="text-[10px] text-slate-400 font-medium">2 hours ago</span>
+                        </div>
+                    </a>
+
+                    <!-- Card 2: Fee Heads Master -->
+                    <a href="fee_heads.html"
+                        class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 group flex flex-col h-full">
+                        <div
+                            class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-6 transition-colors group-hover:bg-emerald-600 group-hover:text-white">
+                            <i class="fa-solid fa-tags text-xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-slate-900 text-base mb-1">Fee Heads Master</h3>
+                            <p class="text-[11px] text-slate-500 leading-relaxed mb-6">Manage reusable fee components.
+                            </p>
+                        </div>
+                        <div class="flex items-center justify-between mt-auto">
+                            <div
+                                class="px-5 py-2 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-all capitalize">
+                                Manage
+                            </div>
+                            <span class="text-[10px] text-slate-400 font-medium">5 hours ago</span>
+                        </div>
+                    </a>
+
+                    <!-- Card 3: Fee Structure Setup -->
+                    <a href="fee-structure.html"
+                        class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 group flex flex-col h-full">
+                        <div
+                            class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-6 transition-colors group-hover:bg-emerald-600 group-hover:text-white">
+                            <i class="fa-solid fa-sitemap text-xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-slate-900 text-base mb-1">Fee Structure Setup</h3>
+                            <p class="text-[11px] text-slate-500 leading-relaxed mb-6">Create class-wise fee
+                                configurations.</p>
+                        </div>
+                        <div class="flex items-center justify-between mt-auto">
+                            <div
+                                class="px-5 py-2 rounded-full text-[11px] font-bold bg-sky-50 text-sky-600 group-hover:bg-sky-600 group-hover:text-white transition-all capitalize">
+                                Open
+                            </div>
+                            <span class="text-[10px] text-slate-400 font-medium">Yesterday</span>
+                        </div>
+                    </a>
+
+                    <!-- Card 4: Discount Categories -->
+                    <a href="discount-categories.html"
+                        class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 group flex flex-col h-full">
+                        <div
+                            class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-6 transition-colors group-hover:bg-emerald-600 group-hover:text-white">
+                            <i class="fa-solid fa-percent text-xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-slate-900 text-base mb-1">Discount Categories</h3>
+                            <p class="text-[11px] text-slate-500 leading-relaxed mb-6">Create and manage discount
+                                templates.</p>
+                        </div>
+                        <div class="flex items-center justify-between mt-auto">
+                            <div
+                                class="px-5 py-2 rounded-full text-[11px] font-bold bg-purple-50 text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition-all capitalize">
+                                Setup
+                            </div>
+                            <span class="text-[10px] text-slate-400 font-medium">2 days ago</span>
+                        </div>
+                    </a>
+
+                    <!-- Card 5: Fee Reports -->
+                    <a href="fee-reports.html"
+                        class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 group flex flex-col h-full">
+                        <div
+                            class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-6 transition-colors group-hover:bg-emerald-600 group-hover:text-white">
+                            <i class="fa-solid fa-chart-column text-xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-slate-900 text-base mb-1">Fee Reports</h3>
+                            <p class="text-[11px] text-slate-500 leading-relaxed mb-6">Monitor financial health and
+                                collections.</p>
+                        </div>
+                        <div class="flex items-center justify-between mt-auto">
+                            <div
+                                class="px-5 py-2 rounded-full text-[11px] font-bold bg-slate-50 text-slate-600 group-hover:bg-slate-600 group-hover:text-white transition-all capitalize">
+                                View
+                            </div>
+                            <span class="text-[10px] text-slate-400 font-medium">1 hour ago</span>
+                        </div>
+                    </a>
+
+                    <!-- Card 6: Expenses (Coming Soon) -->
+                    <div
+                        class="bg-white rounded-3xl p-6 border border-slate-50 shadow-sm opacity-60 cursor-not-allowed flex flex-col h-full">
+                        <div
+                            class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-300 flex items-center justify-center mb-6">
+                            <i class="fa-solid fa-file-invoice text-xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-slate-400 text-base mb-1">Expenses</h3>
+                            <p class="text-[11px] text-slate-300 leading-relaxed mb-6">Track and manage institutional
+                                expenses.</p>
+                        </div>
+                        <div class="flex items-center justify-between mt-auto">
+                            <div
+                                class="px-5 py-2 rounded-full text-[11px] font-bold bg-slate-50 text-slate-300 capitalize">
+                                Phase 2
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 7: Vendor Management (Coming Soon) -->
+                    <div
+                        class="bg-white rounded-3xl p-6 border border-slate-50 shadow-sm opacity-60 cursor-not-allowed flex flex-col h-full">
+                        <div
+                            class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-300 flex items-center justify-center mb-6">
+                            <i class="fa-solid fa-truck text-xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-slate-400 text-base mb-1">Vendor Management</h3>
+                            <p class="text-[11px] text-slate-300 leading-relaxed mb-6">Manage vendors and purchase
+                                orders.</p>
+                        </div>
+                        <div class="flex items-center justify-between mt-auto">
+                            <div
+                                class="px-5 py-2 rounded-full text-[11px] font-bold bg-slate-50 text-slate-300 capitalize">
+                                Phase 2
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </main>
+
+    </div>
+</body>
+
+</html>

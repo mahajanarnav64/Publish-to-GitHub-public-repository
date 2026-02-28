@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fee Collection & Receipts | Hybrid School ERP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+            color: #111827;
+        }
+
+        .sidebar-rail {
+            background-color: #ffffff;
+            border-right: 1px solid #f1f5f9;
+            color: #64748b;
+            z-index: 50;
+        }
+
+        .sidebar-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 0;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            width: 100%;
+            text-decoration: none;
+        }
+
+        .sidebar-item:hover {
+            color: #3b82f6;
+            background-color: #f8fafc;
+        }
+
+        .sidebar-item.active {
+            color: #2563eb;
+            background-color: #eff6ff;
+        }
+
+        .sidebar-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background-color: #2563eb;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .sidebar-icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-label {
+            font-size: 11px;
+            text-align: center;
+            line-height: 1.2;
+            font-weight: 600;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body x-data="feeCollectionApp()" class="flex h-screen overflow-hidden">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar-rail w-[84px] flex flex-col flex-shrink-0 z-50 h-full shadow-sm relative">
+        <div class="h-[76px] flex items-center justify-center border-b border-slate-100 flex-shrink-0">
+            <div
+                class="w-11 h-11 bg-[#2563eb] rounded-xl flex items-center justify-center text-white font-extrabold text-2xl shadow-sm">
+                H</div>
+        </div>
+        <div class="px-3 mb-5 mt-4">
+            <button
+                class="w-full py-3.5 bg-[#eff6ff] text-[#2563eb] hover:bg-blue-100 rounded-2xl flex flex-col items-center justify-center transition-colors border border-blue-100/50 shadow-sm">
+                <i class="fa-solid fa-rocket text-[17px] mb-1.5"></i>
+                <span class="text-[10px] font-bold text-center leading-tight">Quick<br>Start</span>
+            </button>
+        </div>
+        <nav class="flex-1 pb-4 overflow-y-auto flex flex-col items-center">
+            <a href="../index.html" class="sidebar-item"><i class="fa-solid fa-gauge-high sidebar-icon"></i><span
+                    class="sidebar-label">Home</span></a>
+            <a href="#" class="sidebar-item"><i class="fa-solid fa-bell-concierge sidebar-icon"></i><span
+                    class="sidebar-label">Front<br>Office</span></a>
+            <a href="#" class="sidebar-item"><i class="fa-solid fa-user-plus sidebar-icon"></i><span
+                    class="sidebar-label">Admit</span></a>
+            <a href="#" class="sidebar-item"><i class="fa-solid fa-graduation-cap sidebar-icon"></i><span
+                    class="sidebar-label">Student</span></a>
+            <a href="../index.html?module=academics" class="sidebar-item"><i
+                    class="fa-solid fa-book-open sidebar-icon"></i><span class="sidebar-label">Academia</span></a>
+
+            <a href="#" class="sidebar-item"><i class="fa-solid fa-users-gear sidebar-icon"></i><span
+                    class="sidebar-label">HR</span></a>
+            <a href="index.html" class="sidebar-item active"><i class="fa-solid fa-coins sidebar-icon"></i><span
+                    class="sidebar-label">Finance</span></a>
+        </nav>
+        <div class="mt-auto pb-6 pt-4 border-t border-slate-100 flex-shrink-0">
+            <a href="#" class="sidebar-item !py-2"><i class="fa-solid fa-gear sidebar-icon"></i><span
+                    class="sidebar-label">Settings</span></a>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden relative bg-gray-50">
+        <div class="flex-1 overflow-y-auto p-8">
+
+            <!-- Page Title -->
+            <div class="flex justify-between items-start mb-6">
+                <div class="flex items-center gap-4">
+                    <a href="index.html"
+                        class="flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition-colors"
+                        title="Back to Finance">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </a>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">Fee Collection & Receipts</h1>
+                        <p class="text-gray-500 text-sm mt-1">Manage class-wise student fees, record payments, and
+                            download receipts</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dual Pane Layout -->
+            <div class="flex flex-col lg:flex-row gap-6">
+
+                <!-- LEFT: Student Directory -->
+                <div
+                    class="lg:w-[45%] flex flex-col gap-4 h-[650px] bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+                    <h3
+                        class="font-bold text-gray-800 text-sm uppercase tracking-wide border-b border-gray-100 pb-3 mb-1">
+                        Student Directory</h3>
+                    <div class="flex flex-col gap-3 shrink-0">
+                        <div class="flex gap-3">
+                            <div class="flex-1">
+                                <label
+                                    class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Class</label>
+                                <select x-model="filterClass"
+                                    class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg block w-full p-2 outline-none appearance-none cursor-pointer">
+                                    <option value="All">All Classes</option>
+                                    <option value="Class 9">Class 9</option>
+                                    <option value="Class 10">Class 10</option>
+                                </select>
+                            </div>
+                            <div class="flex-1">
+                                <label
+                                    class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Section</label>
+                                <select x-model="filterSection"
+                                    class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg block w-full p-2 outline-none appearance-none cursor-pointer">
+                                    <option value="All">All Sections</option>
+                                    <option value="A">Section A</option>
+                                    <option value="B">Section B</option>
+                                    <option value="C">Section C</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i
+                                    class="fa-solid fa-magnifying-glass text-gray-400"></i></div>
+                            <input type="text" x-model="searchQuery" placeholder="Search by student name or reg no..."
+                                class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg block w-full pl-10 p-2.5 outline-none">
+                        </div>
+                    </div>
+                    <div class="flex-1 overflow-y-auto pr-1 mt-2 space-y-2 pb-2 custom-scrollbar">
+                        <template x-for="student in filteredStudents()" :key="student.id">
+                            <div @click="selectStudent(student)"
+                                class="p-3 border rounded-xl cursor-pointer transition-all hover:shadow-md flex justify-between items-center group relative overflow-hidden"
+                                :class="{'border-blue-500 bg-blue-50/50 shadow-sm ring-1 ring-blue-500': selectedStudent?.id === student.id, 'border-gray-200 bg-white hover:border-blue-300': selectedStudent?.id !== student.id}">
+                                <div class="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 transition-all"
+                                    x-show="selectedStudent?.id === student.id"></div>
+                                <div class="flex gap-3 items-center pl-1">
+                                    <div class="w-10 h-10 rounded-full bg-slate-100 text-slate-600 font-bold flex items-center justify-center text-sm border border-slate-200 group-hover:bg-blue-100 group-hover:text-blue-700"
+                                        :class="{'bg-blue-100 text-blue-700 border-blue-200': selectedStudent?.id === student.id}">
+                                        <span x-text="student.name.split(' ').map(n=>n[0]).join('')"></span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-gray-900 text-sm group-hover:text-blue-700"
+                                            x-text="student.name"></h4>
+                                        <p class="text-[11px] text-gray-500"><span x-text="student.id"></span> &bull;
+                                            <span x-text="student.class"></span>-<span x-text="student.section"></span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="text-right flex flex-col items-end">
+                                    <template x-if="student.pendingAmount > 0"><span
+                                            class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-red-50 text-red-600 border border-red-100">Dues:
+                                            Rs. <span
+                                                x-text="student.pendingAmount.toLocaleString()"></span></span></template>
+                                    <template x-if="student.pendingAmount === 0"><span
+                                            class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-100">Fully
+                                            Paid</span></template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- RIGHT: Detail Panel -->
+                <div
+                    class="lg:w-[55%] flex flex-col h-[650px] bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                    <!-- Empty State -->
+                    <div x-show="!selectedStudent"
+                        class="flex-1 flex flex-col items-center justify-center p-8 text-center bg-slate-50 border-dashed border-2 border-slate-200 rounded-xl m-4">
+                        <div
+                            class="w-20 h-20 bg-white text-slate-300 shadow-sm rounded-full flex items-center justify-center mb-4 border border-slate-100">
+                            <i class="fa-solid fa-hand-holding-dollar text-3xl"></i>
+                        </div>
+                        <h3 class="font-bold text-gray-800 mb-2 text-lg">No Student Selected</h3>
+                        <p class="text-sm text-gray-500 max-w-xs mx-auto">Select a student from the directory on the
+                            left to view their details or collect fees.</p>
+                    </div>
+                    <!-- Student Detail -->
+                    <div x-show="selectedStudent" class="flex flex-col h-full min-h-0 bg-white" x-cloak>
+                        <!-- Header Info -->
+                        <div class="p-6 bg-[#f8f9fc] border-b border-gray-200 shrink-0">
+                            <div class="flex items-start justify-between">
+                                <div class="flex gap-4 items-center">
+                                    <div
+                                        class="w-16 h-16 rounded-xl bg-blue-100 text-blue-600 font-bold flex items-center justify-center text-2xl shadow-inner border border-blue-200/50">
+                                        <span
+                                            x-text="selectedStudent?.name ? selectedStudent.name.split(' ').map(n=>n[0]).join('') : ''"></span>
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <h2 class="text-xl font-bold text-gray-900" x-text="selectedStudent?.name">
+                                            </h2>
+                                            <span
+                                                class="bg-blue-50 text-blue-600 border border-blue-100 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest"
+                                                x-text="selectedStudent?.id"></span>
+                                        </div>
+                                        <p class="text-sm text-gray-600 font-medium">Class: <span
+                                                x-text="selectedStudent?.class"></span> - Section <span
+                                                x-text="selectedStudent?.section"></span></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-3 gap-4 mt-6">
+                                <div class="bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
+                                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total
+                                        Fee</p>
+                                    <p class="font-bold text-gray-800 text-sm"
+                                        x-text="selectedStudent ? 'Rs.  ' + selectedStudent.totalFee.toLocaleString() : ''">
+                                    </p>
+                                </div>
+                                <div class="bg-white p-3 rounded-lg border border-emerald-100 shadow-sm">
+                                    <p class="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mb-1">
+                                        Paid Amount</p>
+                                    <p class="font-bold text-emerald-700 text-sm"
+                                        x-text="selectedStudent ? 'Rs.  ' + selectedStudent.paidAmount.toLocaleString() : ''">
+                                    </p>
+                                </div>
+                                <div class="p-3 rounded-lg border shadow-sm"
+                                    :class="selectedStudent?.pendingAmount === 0 ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200'">
+                                    <p class="text-[10px] font-bold uppercase tracking-widest mb-1"
+                                        :class="selectedStudent?.pendingAmount === 0 ? 'text-emerald-500' : 'text-red-500'"
+                                        x-text="selectedStudent?.pendingAmount === 0 ? 'Status' : 'Pending Dues'"></p>
+                                    <p class="font-extrabold text-lg leading-none"
+                                        :class="selectedStudent?.pendingAmount === 0 ? 'text-emerald-700' : 'text-red-700'"
+                                        x-text="selectedStudent ? (selectedStudent.pendingAmount === 0 ? 'Fully Paid' : 'Rs.  ' + selectedStudent.pendingAmount.toLocaleString()) : ''">
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Tabs -->
+                        <div class="flex border-b border-gray-200 shrink-0 bg-white">
+                            <button @click="activeTab = 'collect'"
+                                class="flex-1 py-3 text-sm font-bold uppercase tracking-wide border-b-2 transition-colors flex items-center justify-center gap-2"
+                                :class="{'border-blue-600 text-blue-700 bg-blue-50/30': activeTab === 'collect', 'border-transparent text-gray-500 hover:text-gray-700': activeTab !== 'collect'}">
+                                <i class="fa-solid fa-cash-register text-lg"></i> Collect Fee
+                            </button>
+                            <button @click="activeTab = 'receipts'"
+                                class="flex-1 py-3 text-sm font-bold uppercase tracking-wide border-b-2 transition-colors flex items-center justify-center gap-2"
+                                :class="{'border-blue-600 text-blue-700 bg-blue-50/30': activeTab === 'receipts', 'border-transparent text-gray-500 hover:text-gray-700': activeTab !== 'receipts'}">
+                                <i class="fa-solid fa-file-invoice-dollar text-lg"></i> Receipt History
+                            </button>
+                        </div>
+                        <!-- Tab: Collect Fee -->
+                        <div x-show="activeTab === 'collect'"
+                            class="flex-1 p-6 overflow-y-auto custom-scrollbar bg-white">
+                            <div x-show="selectedStudent?.pendingAmount === 0" class="text-center py-12">
+                                <div
+                                    class="w-16 h-16 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl border border-emerald-200">
+                                    <i class="fa-solid fa-check-double"></i>
+                                </div>
+                                <h3 class="font-bold text-gray-800 text-lg mb-1">Fully Paid</h3>
+                                <p class="text-sm text-gray-500">This student has no pending fee dues.</p>
+                            </div>
+                            <div x-show="selectedStudent?.pendingAmount > 0">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+                                    <div><label
+                                            class="block text-[11px] font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Paying
+                                            Amount <span class="text-red-500">*</span></label>
+                                        <div class="relative">
+                                            <div
+                                                class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <span class="text-gray-500 font-bold font-mono">Rs. </span>
+                                            </div>
+                                            <input type="number" x-model.number="paymentAmount" placeholder="Amount"
+                                                class="bg-blue-50/30 border border-blue-200 text-blue-900 font-bold text-[14px] rounded-lg block w-full pl-8 py-2 px-3 outline-none">
+                                        </div>
+                                    </div>
+                                    <div><label
+                                            class="block text-[11px] font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Payment
+                                            Date <span class="text-red-500">*</span></label>
+                                        <input type="date" x-model="paymentDate"
+                                            class="bg-white border border-gray-200 text-gray-900 text-[13px] rounded-lg block w-full py-2 px-3 font-medium outline-none">
+                                    </div>
+                                    <div><label
+                                            class="block text-[11px] font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Discount
+                                            (Opt.)</label>
+                                        <select x-model="selectedDiscount"
+                                            class="bg-white border border-gray-200 text-[13px] rounded-lg block w-full py-2 px-3 font-medium outline-none">
+                                            <option value="">No Discount</option>
+                                            <option value="sibling">Sibling Discount (10%)</option>
+                                            <option value="merit">Merit Scholarship (50%)</option>
+                                            <option value="staff">Staff Child (25%)</option>
+                                            <option value="early">Early Bird (Rs. 2,000)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div><label
+                                        class="block text-[11px] font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Mode
+                                        of Payment <span class="text-red-500">*</span></label>
+                                    <div class="grid grid-cols-3 gap-3 mb-4">
+                                        <label
+                                            class="cursor-pointer border border-gray-200 rounded-lg py-2 px-3 flex flex-col items-center gap-1.5 hover:bg-gray-50 transition-colors"
+                                            :class="{'border-blue-500 bg-blue-50 text-blue-700 shadow-sm': paymentMode === 'Cash'}"><input
+                                                type="radio" value="Cash" x-model="paymentMode" class="hidden"><i
+                                                class="fa-solid fa-money-bill text-lg opacity-80"></i><span
+                                                class="text-[12px] font-bold">Cash</span></label>
+                                        <label
+                                            class="cursor-pointer border border-gray-200 rounded-lg py-2 px-3 flex flex-col items-center gap-1.5 hover:bg-gray-50 transition-colors"
+                                            :class="{'border-blue-500 bg-blue-50 text-blue-700 shadow-sm': paymentMode === 'UPI'}"><input
+                                                type="radio" value="UPI" x-model="paymentMode" class="hidden"><i
+                                                class="fa-solid fa-mobile-screen text-lg opacity-80"></i><span
+                                                class="text-[12px] font-bold">UPI</span></label>
+                                        <label
+                                            class="cursor-pointer border border-gray-200 rounded-lg py-2 px-3 flex flex-col items-center gap-1.5 hover:bg-gray-50 transition-colors"
+                                            :class="{'border-blue-500 bg-blue-50 text-blue-700 shadow-sm': paymentMode === 'Cheque'}"><input
+                                                type="radio" value="Cheque" x-model="paymentMode" class="hidden"><i
+                                                class="fa-solid fa-money-check text-lg opacity-80"></i><span
+                                                class="text-[12px] font-bold">Cheque</span></label>
+                                    </div>
+                                </div>
+                                <div x-show="paymentMode !== 'Cash'" class="mb-4"><label
+                                        class="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Reference
+                                        / Cheque Number <span class="text-red-500">*</span></label>
+                                    <input type="text" x-model="referenceNumber"
+                                        placeholder="Enter transaction details..."
+                                        class="bg-white border border-gray-200 text-gray-900 text-[13px] rounded-lg block w-full py-2 px-3 outline-none">
+                                </div>
+                                <div class="pt-2"><button @click="submitPayment()"
+                                        class="w-full py-4 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-sm font-bold shadow-md transition-colors flex justify-center items-center gap-2"
+                                        :disabled="!paymentAmount || paymentAmount <= 0 || paymentAmount > selectedStudent?.pendingAmount || (paymentMode !== 'Cash' && !referenceNumber)">
+                                        <i class="fa-solid fa-check-circle"></i> Complete Payment & Generate Receipt
+                                    </button></div>
+                            </div>
+                        </div>
+                        <!-- Tab: Receipts -->
+                        <div x-show="activeTab === 'receipts'"
+                            class="flex-1 overflow-y-auto custom-scrollbar bg-[#fcfdfd] relative">
+                            <div x-show="!selectedStudent?.receipts || selectedStudent.receipts.length === 0"
+                                class="flex flex-col items-center justify-center p-12 text-center h-full absolute inset-0">
+                                <div
+                                    class="w-16 h-16 bg-gray-50 text-gray-300 rounded-full flex items-center justify-center mb-4 text-2xl border border-gray-200">
+                                    <i class="fa-solid fa-receipt"></i>
+                                </div>
+                                <h3 class="font-bold text-gray-800 text-lg mb-1">No Receipts Found</h3>
+                                <p class="text-sm text-gray-500">No recorded payment history yet.</p>
+                            </div>
+                            <div x-show="selectedStudent?.receipts && selectedStudent.receipts.length > 0">
+                                <table class="w-full text-left text-sm text-gray-600 border-collapse">
+                                    <thead
+                                        class="text-xs text-gray-500 uppercase bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
+                                        <tr>
+                                            <th class="px-5 py-3 font-bold">Receipt No.</th>
+                                            <th class="px-5 py-3 font-bold">Date & Mode</th>
+                                            <th class="px-5 py-3 font-bold text-right">Amount Paid</th>
+                                            <th class="px-5 py-3 font-bold text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-100 bg-white">
+                                        <template x-for="rcpt in selectedStudent?.receipts" :key="rcpt.no">
+                                            <tr class="hover:bg-gray-50 transition-colors">
+                                                <td class="px-5 py-3.5">
+                                                    <div class="font-bold text-gray-900" x-text="rcpt.no"></div>
+                                                    <div class="text-[10px] text-gray-400 font-mono mt-0.5"
+                                                        x-show="rcpt.reference" x-text="rcpt.reference"></div>
+                                                </td>
+                                                <td class="px-5 py-3.5">
+                                                    <div class="font-bold text-gray-700" x-text="rcpt.date"></div>
+                                                    <div class="text-[10px] text-gray-500 bg-gray-100 border border-gray-200 inline-block px-1.5 py-0.5 rounded mt-1 font-bold uppercase"
+                                                        x-text="rcpt.mode"></div>
+                                                </td>
+                                                <td class="px-5 py-3.5 text-right">
+                                                    <div class="font-bold text-gray-900"
+                                                        x-text="'Rs.  ' + rcpt.amount.toLocaleString()"></div>
+                                                </td>
+                                                <td class="px-5 py-3.5 text-right"><button
+                                                        class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"><i
+                                                            class="fa-solid fa-eye"></i></button><button
+                                                        class="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg"><i
+                                                            class="fa-solid fa-download"></i></button></td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- TOAST -->
+    <div x-show="toast.show" x-transition.opacity x-cloak
+        class="fixed bottom-6 right-6 px-5 py-3 rounded-lg shadow-xl text-sm font-bold flex items-center gap-3 z-[200] bg-emerald-600 text-white">
+        <i class="fa-solid fa-circle-check"></i><span x-text="toast.message"></span>
+    </div>
+
+    <script>
+        function feeCollectionApp() {
+            return {
+                filterClass: 'All', filterSection: 'All', searchQuery: '',
+                selectedStudent: null, activeTab: 'collect',
+                paymentAmount: null, paymentDate: new Date().toISOString().split('T')[0],
+                paymentMode: 'Cash', referenceNumber: '', selectedDiscount: '',
+                toast: { show: false, message: '' },
+
+                students: [
+                    { id: 'STU001', name: 'Alex Johnson', class: 'Class 10', section: 'A', totalFee: 50000, paidAmount: 35000, pendingAmount: 15000, receipts: [{ no: 'RCPT-8001', amount: 20000, date: '10/01/2026', mode: 'UPI', reference: 'UPI8291' }, { no: 'RCPT-7801', amount: 15000, date: '01/12/2025', mode: 'Cash', reference: '' }] },
+                    { id: 'STU002', name: 'Priya Sharma', class: 'Class 10', section: 'A', totalFee: 50000, paidAmount: 50000, pendingAmount: 0, receipts: [{ no: 'RCPT-8010', amount: 50000, date: '05/01/2026', mode: 'Bank Transfer', reference: 'NEFT221' }] },
+                    { id: 'STU003', name: 'Rahul Patel', class: 'Class 9', section: 'B', totalFee: 45000, paidAmount: 20000, pendingAmount: 25000, receipts: [{ no: 'RCPT-7900', amount: 20000, date: '15/12/2025', mode: 'Cash', reference: '' }] },
+                    { id: 'STU004', name: 'Sneha Kumar', class: 'Class 9', section: 'A', totalFee: 45000, paidAmount: 45000, pendingAmount: 0, receipts: [{ no: 'RCPT-7850', amount: 25000, date: '10/11/2025', mode: 'UPI', reference: 'UPI6621' }, { no: 'RCPT-7710', amount: 20000, date: '01/10/2025', mode: 'Cash', reference: '' }] },
+                    { id: 'STU005', name: 'Amit Singh', class: 'Class 10', section: 'B', totalFee: 50000, paidAmount: 10000, pendingAmount: 40000, receipts: [{ no: 'RCPT-7700', amount: 10000, date: '20/10/2025', mode: 'Cash', reference: '' }] },
+                    { id: 'STU006', name: 'Kavita Reddy', class: 'Class 9', section: 'C', totalFee: 45000, paidAmount: 30000, pendingAmount: 15000, receipts: [{ no: 'RCPT-7950', amount: 15000, date: '20/01/2026', mode: 'Cheque', reference: 'CHQ551' }, { no: 'RCPT-7800', amount: 15000, date: '05/12/2025', mode: 'Cash', reference: '' }] }
+                ],
+
+                filteredStudents() {
+                    return this.students.filter(s => {
+                        let matchClass = this.filterClass === 'All' || s.class === this.filterClass;
+                        let matchSection = this.filterSection === 'All' || s.section === this.filterSection;
+                        let matchSearch = !this.searchQuery || s.name.toLowerCase().includes(this.searchQuery.toLowerCase()) || s.id.toLowerCase().includes(this.searchQuery.toLowerCase());
+                        return matchClass && matchSection && matchSearch;
+                    });
+                },
+                selectStudent(student) {
+                    this.selectedStudent = student;
+                    this.activeTab = 'collect';
+                    this.paymentAmount = student.pendingAmount > 0 ? student.pendingAmount : null;
+                    this.paymentMode = 'Cash';
+                    this.referenceNumber = '';
+                    this.selectedDiscount = '';
+                },
+                submitPayment() {
+                    if (!this.paymentAmount || this.paymentAmount <= 0) return;
+                    let rcptNo = 'RCPT-' + Math.floor(1000 + Math.random() * 9000);
+                    let formattedDate = new Date(this.paymentDate).toLocaleDateString('en-GB');
+                    let newRcpt = { no: rcptNo, amount: this.paymentAmount, date: formattedDate, mode: this.paymentMode, reference: this.referenceNumber };
+                    this.selectedStudent.receipts.unshift(newRcpt);
+                    this.selectedStudent.paidAmount += this.paymentAmount;
+                    this.selectedStudent.pendingAmount -= this.paymentAmount;
+                    this.showToast('Payment recorded! Receipt: ' + rcptNo);
+                    this.paymentAmount = this.selectedStudent.pendingAmount > 0 ? this.selectedStudent.pendingAmount : null;
+                    this.referenceNumber = '';
+                },
+                showToast(msg) {
+                    this.toast = { show: true, message: msg };
+                    setTimeout(() => { this.toast.show = false; }, 3000);
+                }
+            };
+        }
+    </script>
+</body>
+
+</html>

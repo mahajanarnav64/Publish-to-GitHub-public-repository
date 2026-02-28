@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discount Categories | Hybrid School ERP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+            color: #111827;
+        }
+
+        .sidebar-rail {
+            background-color: #ffffff;
+            border-right: 1px solid #f1f5f9;
+            color: #64748b;
+            z-index: 50;
+        }
+
+        .sidebar-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 0;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            width: 100%;
+            text-decoration: none;
+        }
+
+        .sidebar-item:hover {
+            color: #3b82f6;
+            background-color: #f8fafc;
+        }
+
+        .sidebar-item.active {
+            color: #2563eb;
+            background-color: #eff6ff;
+        }
+
+        .sidebar-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background-color: #2563eb;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .sidebar-icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-label {
+            font-size: 11px;
+            text-align: center;
+            line-height: 1.2;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body x-data="discountApp()" class="flex h-screen overflow-hidden">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar-rail w-[84px] flex flex-col flex-shrink-0 z-50 h-full shadow-sm relative">
+        <div class="h-[76px] flex items-center justify-center border-b border-slate-100 flex-shrink-0">
+            <div
+                class="w-11 h-11 bg-[#2563eb] rounded-xl flex items-center justify-center text-white font-extrabold text-2xl shadow-sm">
+                H</div>
+        </div>
+        <div class="px-3 mb-5 mt-4">
+            <button
+                class="w-full py-3.5 bg-[#eff6ff] text-[#2563eb] hover:bg-blue-100 rounded-2xl flex flex-col items-center justify-center transition-colors border border-blue-100/50 shadow-sm">
+                <i class="fa-solid fa-rocket text-[17px] mb-1.5"></i>
+                <span class="text-[10px] font-bold text-center leading-tight">Quick<br>Start</span>
+            </button>
+        </div>
+        <nav class="flex-1 pb-4 overflow-y-auto flex flex-col items-center">
+            <a href="../index.html" class="sidebar-item"><i class="fa-solid fa-gauge-high sidebar-icon"></i><span
+                    class="sidebar-label">Home</span></a>
+            <a href="#" class="sidebar-item"><i class="fa-solid fa-bell-concierge sidebar-icon"></i><span
+                    class="sidebar-label">Front<br>Office</span></a>
+            <a href="#" class="sidebar-item"><i class="fa-solid fa-user-plus sidebar-icon"></i><span
+                    class="sidebar-label">Admit</span></a>
+            <a href="#" class="sidebar-item"><i class="fa-solid fa-graduation-cap sidebar-icon"></i><span
+                    class="sidebar-label">Student</span></a>
+            <a href="../index.html?module=academics" class="sidebar-item"><i
+                    class="fa-solid fa-book-open sidebar-icon"></i><span class="sidebar-label">Academia</span></a>
+
+            <a href="#" class="sidebar-item"><i class="fa-solid fa-users-gear sidebar-icon"></i><span
+                    class="sidebar-label">HR</span></a>
+            <a href="index.html" class="sidebar-item active"><i class="fa-solid fa-coins sidebar-icon"></i><span
+                    class="sidebar-label">Finance</span></a>
+        </nav>
+        <div class="mt-auto pb-6 pt-4 border-t border-slate-100 flex-shrink-0">
+            <a href="#" class="sidebar-item !py-2"><i class="fa-solid fa-gear sidebar-icon"></i><span
+                    class="sidebar-label">Settings</span></a>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden relative bg-gray-50">
+        <div class="flex-1 overflow-y-auto p-8">
+
+            <!-- Page Title -->
+            <div class="flex justify-between items-start mb-6">
+                <div class="flex items-center gap-4">
+                    <a href="index.html"
+                        class="flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition-colors"
+                        title="Back to Finance">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </a>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">Discount Categories</h1>
+                        <p class="text-gray-500 text-sm mt-1">Create reusable discount templates for fee collection</p>
+                    </div>
+                </div>
+                <button @click="openModal()"
+                    class="px-5 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-bold hover:bg-blue-700 shadow-sm flex items-center gap-2 transition-colors">
+                    <i class="fa-solid fa-plus"></i> Add Category
+                </button>
+            </div>
+
+            <!-- Table -->
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden min-h-[400px]">
+                <table class="w-full text-sm text-left text-gray-500">
+                    <thead class="text-xs text-gray-500 uppercase bg-gray-50 border-b border-gray-100">
+                        <tr>
+                            <th class="px-6 py-4 font-bold">Discount Name</th>
+                            <th class="px-6 py-4 font-bold">Type</th>
+                            <th class="px-6 py-4 font-bold">Value</th>
+                            <th class="px-6 py-4 font-bold">Description</th>
+                            <th class="px-6 py-4 font-bold text-center">Status</th>
+                            <th class="px-6 py-4 font-bold text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        <template x-for="disc in discounts" :key="disc.id">
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="px-6 py-4 font-bold text-gray-900" x-text="disc.name"></td>
+                                <td class="px-6 py-4">
+                                    <span class="px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider"
+                                        :class="disc.type === 'percentage' ? 'bg-purple-50 text-purple-600' : 'bg-blue-50 text-blue-600'"
+                                        x-text="disc.type"></span>
+                                </td>
+                                <td class="px-6 py-4 font-bold"
+                                    x-text="disc.type === 'percentage' ? disc.value + '%' : 'Rs.  ' + disc.value.toLocaleString()">
+                                </td>
+                                <td class="px-6 py-4 text-gray-600" x-text="disc.description || '--'"></td>
+                                <td class="px-6 py-4 text-center">
+                                    <button @click="toggleStatus(disc)"
+                                        class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider w-20 text-center border transition-colors"
+                                        :class="disc.status === 'active' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-gray-50 text-gray-500 border-gray-200'"
+                                        x-text="disc.status"></button>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <button @click="editDiscount(disc)"
+                                        class="text-gray-400 hover:text-blue-600 transition-colors p-2 rounded-lg hover:bg-blue-50"><i
+                                            class="fa-solid fa-pen-to-square"></i></button>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL -->
+    <div x-show="showModal" x-cloak
+        class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md flex flex-col" @click.stop>
+            <div class="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-xl">
+                <h3 class="text-lg font-bold text-gray-900"
+                    x-text="modalMode === 'add' ? 'Add Discount Category' : 'Edit Discount'"></h3>
+                <button @click="showModal = false"
+                    class="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-200 shadow-sm"><i
+                        class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-6">
+                <div class="mb-5"><label class="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Name <span
+                            class="text-red-500">*</span></label>
+                    <input type="text" x-model="form.name" placeholder="E.g. Sibling Discount"
+                        class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:border-blue-500 outline-none">
+                </div>
+                <div class="mb-5"><label class="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Type <span
+                            class="text-red-500">*</span></label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="cursor-pointer border rounded-lg p-3 flex items-center gap-2 transition-colors"
+                            :class="form.type === 'percentage' ? 'border-purple-500 bg-purple-50 text-purple-700' : 'border-gray-200 text-gray-600'"><input
+                                type="radio" value="percentage" x-model="form.type" class="hidden"><span
+                                class="text-sm font-bold">Percentage (%)</span></label>
+                        <label class="cursor-pointer border rounded-lg p-3 flex items-center gap-2 transition-colors"
+                            :class="form.type === 'fixed' ? 'border-purple-500 bg-purple-50 text-purple-700' : 'border-gray-200 text-gray-600'"><input
+                                type="radio" value="fixed" x-model="form.type" class="hidden"><span
+                                class="text-sm font-bold">Fixed (Rs. )</span></label>
+                    </div>
+                </div>
+                <div class="mb-5"><label class="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Value <span
+                            class="text-red-500">*</span></label>
+                    <input type="number" x-model.number="form.value" placeholder="Enter value"
+                        class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:border-blue-500 outline-none">
+                </div>
+                <div class="mb-5"><label class="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Description
+                        <span class="text-gray-400 font-normal">(Optional)</span></label>
+                    <textarea x-model="form.description" rows="2" placeholder="Enter description..."
+                        class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:border-blue-500 outline-none resize-none"></textarea>
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3 rounded-b-xl">
+                <button @click="showModal = false"
+                    class="px-5 py-2.5 text-sm text-gray-600 font-bold hover:bg-gray-200 rounded-lg">Cancel</button>
+                <button @click="save()"
+                    class="px-6 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-bold hover:bg-blue-700 shadow-md flex items-center gap-2"><i
+                        class="fa-solid fa-check"></i> Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div x-show="toast.show" x-transition.opacity x-cloak
+        class="fixed bottom-6 right-6 px-5 py-3 rounded-lg shadow-xl text-sm font-bold flex items-center gap-3 z-[200] bg-emerald-600 text-white">
+        <i class="fa-solid fa-circle-check"></i><span x-text="toast.message"></span>
+    </div>
+
+    <script>
+        function discountApp() {
+            return {
+                showModal: false, modalMode: 'add',
+                form: { id: null, name: '', type: 'percentage', value: null, description: '' },
+                toast: { show: false, message: '' },
+                discounts: [
+                    { id: 1, name: 'Sibling Discount', type: 'percentage', value: 10, description: 'Discount for siblings studying in the same school', status: 'active' },
+                    { id: 2, name: 'Staff Child', type: 'percentage', value: 25, description: 'Discount for children of staff members', status: 'active' },
+                    { id: 3, name: 'Early Bird', type: 'fixed', value: 2000, description: 'Flat discount for early fee payment', status: 'active' },
+                    { id: 4, name: 'Merit Scholarship', type: 'percentage', value: 50, description: 'For students with outstanding academic performance', status: 'active' },
+                    { id: 5, name: 'Single Parent', type: 'percentage', value: 15, description: 'Concession for single parent families', status: 'inactive' },
+                    { id: 6, name: 'Economically Weaker Section', type: 'percentage', value: 100, description: 'Full fee waiver under EWS quota', status: 'active' },
+                ],
+                openModal() { this.modalMode = 'add'; this.form = { id: null, name: '', type: 'percentage', value: null, description: '' }; this.showModal = true; },
+                editDiscount(disc) { this.modalMode = 'edit'; this.form = { ...disc }; this.showModal = true; },
+                toggleStatus(disc) { disc.status = disc.status === 'active' ? 'inactive' : 'active'; this.showToast(disc.name + ' is now ' + disc.status); },
+                save() {
+                    if (!this.form.name.trim() || !this.form.value) return this.showToast('All fields required');
+                    if (this.form.type === 'percentage' && this.form.value > 100) return this.showToast('Maximum 100%');
+                    if (this.modalMode === 'add') {
+                        this.discounts.unshift({ id: Date.now(), name: this.form.name, type: this.form.type, value: this.form.value, description: this.form.description, status: 'active' });
+                        this.showToast('Category created successfully');
+                    } else {
+                        let idx = this.discounts.findIndex(d => d.id === this.form.id);
+                        if (idx !== -1) { Object.assign(this.discounts[idx], this.form); this.showToast('Category updated successfully'); }
+                    }
+                    this.showModal = false;
+                },
+                showToast(msg) { this.toast = { show: true, message: msg }; setTimeout(() => { this.toast.show = false; }, 3000); }
+            };
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Syllabus Planner | Hybrid School ERP</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+            color: #111827;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            padding: 0.6rem 1rem;
+            color: #64748b;
+            font-weight: 500;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .sidebar-link:hover {
+            color: #0f172a;
+            background-color: #f1f5f9;
+        }
+
+        .module-active {
+            background-color: #eff6ff !important;
+            color: #2563eb !important;
+        }
+
+        /* Timeline specific styles */
+        .timeline-line {
+            position: absolute;
+            left: 24px;
+            top: 38px;
+            bottom: -20px;
+            width: 2px;
+            background-color: #e5e7eb;
+        }
+
+        .timeline-item:last-child .timeline-line {
+            display: none;
+        }
+
+        .timeline-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            position: absolute;
+            left: 19px;
+            top: 24px;
+            z-index: 10;
+            border: 2px solid #fff;
+            box-shadow: 0 0 0 2px #fff;
+        }
+
+        /* Narrow Rail Styles */
+        .sidebar-rail {
+            background-color: #ffffff;
+            border-right: 1px solid #f1f5f9;
+            color: #64748b;
+            z-index: 50;
+        }
+
+        .sidebar-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 0;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            width: 100%;
+        }
+
+        .sidebar-item:hover {
+            color: #3b82f6;
+            background-color: #f8fafc;
+        }
+
+        .sidebar-item.active {
+            color: #2563eb;
+            background-color: #eff6ff;
+        }
+
+        .sidebar-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background-color: #2563eb;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .sidebar-icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-label {
+            font-size: 11px;
+            text-align: center;
+            line-height: 1.2;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body x-data="{ 
+    sidebarOpen: true, 
+    expandedMenu: 'academics',
+    currentRole: 'Admin',
+    planModal: false,
+    planStep: 1,
+    viewingPlan: null,
+    viewingClass: null,
+    viewingSubjects: false,
+    teacherViewMode: 'Table',
+    
+    classesWithSyllabus: [
+        { 
+            id: 1, 
+            className: 'Class 10', 
+            section: 'A', 
+            classTeacher: 'Mr. Rajesh Kumar', 
+            students: 42, 
+            overallProgress: 65, 
+            updatedAt: '27 Aug, 2025',
+            status: 'Active',
+            subjects: [
+                { id: 101, name: 'Mathematics', teacher: 'Mr. Rajesh Kumar', progress: 43, chapters: 6, completed: '2/6' },
+                { id: 102, name: 'Science', teacher: 'Ms. Priya Sharma', progress: 47, chapters: 5, completed: '1/5' },
+                { id: 103, name: 'English', teacher: 'Mr. S.N. Gupta', progress: 85, chapters: 4, completed: '3/4' }
+            ]
+        },
+        { 
+            id: 2, 
+            className: 'Class 9', 
+            section: 'B', 
+            classTeacher: 'Ms. Anjali Singh', 
+            students: 38, 
+            overallProgress: 40, 
+            updatedAt: '29 Aug, 2025',
+            status: 'Active',
+            subjects: [
+                { id: 201, name: 'Mathematics', teacher: 'Mr. Amit Verma', progress: 30, chapters: 8, completed: '1/8' },
+                { id: 202, name: 'History', teacher: 'Mr. Vikram Roy', progress: 50, chapters: 6, completed: '3/6' }
+            ]
+        },
+        { 
+            id: 3, 
+            className: 'Class 12', 
+            section: 'C', 
+            classTeacher: 'Mr. Vikram Roy', 
+            students: 30, 
+            overallProgress: 15, 
+            updatedAt: '22 Aug, 2025',
+            status: 'Active',
+            subjects: [
+                { id: 301, name: 'Physics', teacher: 'Mr. S. Sharma', progress: 10, chapters: 12, completed: '1/12' },
+                { id: 302, name: 'Chemistry', teacher: 'Ms. L. Paul', progress: 20, chapters: 10, completed: '2/10' }
+            ]
+        }
+    ],
+
+    // Teacher Mock Data
+    teacherChapters: [
+        { 
+            id: 1, 
+            name: 'Real Numbers', 
+            days: 5, 
+            status: 'Completed', 
+            progress: 100, 
+            expanded: false,
+            reason: 'Completed earlier than planned as students were already familiar with the basics.',
+            topics: [
+                { 
+                    id: 101, 
+                    name: 'Euclid’s Division Lemma', 
+                    status: 'Completed',
+                    isOnTime: false,
+                    reason: 'Topic finished 1 day late due to extra doubt sessions.'
+                }, 
+                { 
+                    id: 102, 
+                    name: 'The Fundamental Theorem of Arithmetic', 
+                    status: 'Completed',
+                    isOnTime: true,
+                    reason: ''
+                }
+            ] 
+        },
+        { 
+            id: 2, 
+            name: 'Polynomials', 
+            days: 6, 
+            status: 'In Progress', 
+            progress: 50, 
+            expanded: true,
+            reason: 'Running slightly behind because Chapter 1 required revision.',
+            topics: [
+                { 
+                    id: 201, 
+                    name: 'Geometrical Meaning of the Zeroes', 
+                    status: 'Completed',
+                    isOnTime: true,
+                    reason: 'Completed exactly on the planned date.'
+                }, 
+                { 
+                    id: 202, 
+                    name: 'Relationship between Zeroes and Coefficients', 
+                    status: 'Pending',
+                    isOnTime: true,
+                    reason: ''
+                }
+            ] 
+        }
+    ],
+
+    newPlan: { id: null, session: '', class: '', subject: '', chapters: [] },
+
+    toggleRole() {
+        this.currentRole = this.currentRole === 'Admin' ? 'Teacher' : 'Admin';
+    },
+
+    viewClassSubjects(cls) {
+        this.viewingClass = cls;
+        this.viewingSubjects = true;
+        this.viewingPlan = null;
+    },
+
+    viewSubjectDetail(sub) {
+        this.viewingPlan = { 
+            id: sub.id, 
+            class: this.viewingClass.className + '-' + this.viewingClass.section, 
+            subject: sub.name, 
+            teacher: sub.teacher,
+            progress: sub.progress,
+            chapters: sub.chapters
+        };
+        this.viewingSubjects = false;
+    },
+
+    editSyllabus(sub) {
+        // Pre-populate newPlan for editing
+        this.newPlan = {
+            id: sub.id,
+            session: '2024-2025',
+            class: this.viewingClass.className,
+            subject: sub.name,
+            chapters: JSON.parse(JSON.stringify(this.teacherChapters)) // Mocking loading existing chapters
+        };
+        this.planStep = 1;
+        this.planModal = true;
+    },
+
+    backToClasses() {
+        this.viewingClass = null; this.viewingSubjects = false; this.viewingPlan = null;
+    },
+
+    validateAndSavePlan() {
+        let isValid = true; let errorMessage = '';
+        for (let i = 0; i < this.newPlan.chapters.length; i++) {
+            let ch = this.newPlan.chapters[i];
+            let chapterTarget = parseInt(ch.duration) || 0;
+            let sumOfTopics = ch.topics.reduce((sum, t) => sum + (parseInt(t.duration) || 0), 0);
+            if (chapterTarget !== sumOfTopics) { isValid = false; errorMessage += `Chapter ${i+1}: Sum mismatch.\n`; }
+        }
+        if(!isValid) alert(errorMessage); else { 
+            this.planModal = false; 
+            alert(this.newPlan.id ? 'Syllabus Updated!' : 'Syllabus Saved!'); 
+        }
+    },
+
+    openCreateModal() { 
+        this.newPlan = { id: null, session: '', class: '', subject: '', chapters: [{ id: 1, name: '', duration: 0, topics: [] }] };
+        this.planStep = 1; 
+        this.planModal = true; 
+    },
+    viewPlanDetail(plan) { this.viewingPlan = plan; },
+    addTopicToChapter(chapter) { 
+        let topicName = prompt('Topic:'); 
+        if(topicName) chapter.topics.push({ id: Date.now(), name: topicName, status: 'Pending' }); 
+    },
+    addChapter() { this.newPlan.chapters.push({ id: Date.now(), name: '', duration: 0, topics: [] }); },
+    addTopic(cIndex) { this.newPlan.chapters[cIndex].topics.push({ id: Date.now(), name: '', duration: 1 }); },
+    removeTopic(cIndex, tIndex) { this.newPlan.chapters[cIndex].topics.splice(tIndex, 1); },
+    removeChapter(index) { this.newPlan.chapters.splice(index, 1); },
+    getStatusColor(status) { return status === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'; },
+    getDotColor(status) { return status === 'Completed' ? 'bg-green-500' : 'bg-blue-500'; }
+
+    }" class="flex h-screen overflow-hidden">
+
+    <!-- 1. NARROW RAIL SIDEBAR -->
+    <aside class="sidebar-rail w-[84px] flex flex-col flex-shrink-0 z-50 h-full shadow-sm relative">
+
+        <!-- Logo -->
+        <div class="h-[76px] flex items-center justify-center border-b border-slate-100 flex-shrink-0">
+            <div
+                class="w-11 h-11 bg-[#2563eb] rounded-xl flex items-center justify-center text-white font-extrabold text-2xl shadow-sm">
+                H</div>
+        </div>
+
+        <!-- Getting Started -->
+        <div class="px-3 mb-5 mt-4">
+            <button
+                class="w-full py-3.5 bg-[#eff6ff] text-[#2563eb] hover:bg-blue-100 rounded-2xl flex flex-col items-center justify-center transition-colors border border-blue-100/50 shadow-sm">
+                <i class="fa-solid fa-rocket text-[17px] mb-1.5"></i>
+                <span class="text-[10px] font-bold text-center leading-tight">Quick<br>Start</span>
+            </button>
+        </div>
+
+        <!-- Nav Items -->
+        <nav class="flex-1 pb-4 overflow-y-auto scrollbar-hide flex flex-col items-center">
+
+            <a href="../index.html" class="sidebar-item">
+                <i class="fa-solid fa-gauge-high sidebar-icon"></i><span class="sidebar-label">Home</span>
+            </a>
+
+            <a href="#" class="sidebar-item">
+                <i class="fa-solid fa-bell-concierge sidebar-icon"></i><span
+                    class="sidebar-label">Front<br>Office</span>
+            </a>
+
+            <a href="#" class="sidebar-item">
+                <i class="fa-solid fa-user-plus sidebar-icon"></i><span class="sidebar-label">Admit</span>
+            </a>
+
+            <a href="#" class="sidebar-item">
+                <i class="fa-solid fa-graduation-cap sidebar-icon"></i><span class="sidebar-label">Student</span>
+            </a>
+
+            <a href="../index.html?module=academics" class="sidebar-item active"><i
+                    class="fa-solid fa-book-open sidebar-icon"></i><span class="sidebar-label">Academia</span></a>
+
+
+
+            <a href="#" class="sidebar-item">
+                <i class="fa-solid fa-users-gear sidebar-icon"></i><span class="sidebar-label">HR</span>
+            </a>
+
+            <a href="../finance/index.html" class="sidebar-item">
+                <i class="fa-solid fa-coins sidebar-icon"></i><span class="sidebar-label">Finance</span>
+            </a>
+        </nav>
+
+        <div class="mt-auto pb-6 pt-4 border-t border-slate-100 flex-shrink-0">
+            <a href="#" class="sidebar-item !py-2">
+                <i class="fa-solid fa-gear sidebar-icon"></i><span class="sidebar-label">Config</span>
+            </a>
+        </div>
+    </aside>
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden relative bg-gray-50">
+
+        <!-- HEADER -->
+        <header class="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-8 z-10 sticky top-0">
+            <div class="flex items-center gap-4">
+                <button @click="sidebarOpen = !sidebarOpen" class="text-slate-400 hover:text-slate-600 md:hidden"><i
+                        class="fa-solid fa-bars"></i></button>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <button @click="toggleRole()"
+                    class="text-xs font-bold px-3 py-1.5 rounded-full border border-blue-200 text-blue-600 bg-blue-50 transition-colors hover:bg-blue-100 flex gap-2 items-center shadow-sm">
+                    Switch Role (Testing) <span class="bg-blue-600 text-white px-2 py-0.5 rounded uppercase"
+                        x-text="currentRole"></span>
+                </button>
+                <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs"
+                    x-text="currentRole.charAt(0)">
+                </div>
+            </div>
+        </header>
+
+        <!-- CONTENT AREA -->
+        <div class="flex-1 overflow-y-auto p-8">
+
+            <!-- CLASS LIST VIEW -->
+            <div x-show="!viewingPlan && !viewingSubjects">
+                <!-- Page Title -->
+                <div class="flex justify-between items-start mb-6">
+                    <div class="flex items-center gap-4">
+                        <a href="../index.html?module=academics"
+                            class="flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition-colors tooltip"
+                            title="Back to Dashboard">
+                            <i class="fa-solid fa-arrow-left"></i>
+                        </a>
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-900">Syllabus Planner</h1>
+                            <p class="text-gray-500 text-sm mt-1">Create and manage syllabus plans (Chapters & Topics)
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex gap-3" x-show="currentRole === 'Admin'">
+                        <button @click="openCreateModal()"
+                            class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 shadow-sm flex items-center gap-2">
+                            <i class="fa-solid fa-plus"></i> Create Syllabus Plan
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div
+                    class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-6 flex flex-wrap items-center gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1">Class</label>
+                        <select
+                            class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-32 p-2 outline-none">
+                            <option value="">All</option>
+                            <option>Class 9</option>
+                            <option>Class 10</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1">Section</label>
+                        <select
+                            class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-32 p-2 outline-none">
+                            <option value="">All</option>
+                            <option>A</option>
+                            <option>B</option>
+                            <option>C</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1">Subject</label>
+                        <select
+                            class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-40 p-2 outline-none">
+                            <option value="">All</option>
+                            <option>Mathematics</option>
+                            <option>Science</option>
+                            <option>English</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1">Teacher</label>
+                        <select
+                            class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-48 p-2 outline-none">
+                            <option value="">All</option>
+                            <option>Mr. Rajesh Kumar</option>
+                            <option>Ms. Priya Sharma</option>
+                            <option>Mr. Amit Verma</option>
+                        </select>
+                    </div>
+                    <div class="flex-1 text-right mt-5">
+                        <button
+                            class="px-5 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 shadow-sm transition-colors flex items-center justify-center gap-2 ml-auto">
+                            <i class="fa-solid fa-filter text-gray-400"></i> Apply
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Redesigned Class Cards (Matching Image Style) -->
+                <div class="space-y-4">
+                    <template x-for="cls in classesWithSyllabus" :key="cls.id">
+                        <div
+                            class="bg-white rounded-2xl border border-slate-100 p-3 flex items-center justify-between shadow-sm hover:shadow-md transition-all group text-left">
+                            <!-- Left: Class Info -->
+                            <div class="flex-1 pl-2">
+                                <h3 class="text-slate-800 font-bold text-base" x-text="cls.className"></h3>
+                                <div class="text-slate-400 text-[10px] font-medium mt-0.5">Syllabus Listing</div>
+                            </div>
+
+                            <!-- Center: Stat Badges -->
+                            <div class="flex items-center gap-3 px-6 border-x border-slate-50">
+                                <!-- Section Badge -->
+                                <div
+                                    class="bg-purple-50 rounded-xl px-4 py-1.5 flex flex-col items-center justify-center min-w-[70px] border border-purple-100/50">
+                                    <div class="flex items-center gap-1.5 mb-0.5">
+                                        <i class="fa-solid fa-layer-group text-[9px] text-purple-500"></i>
+                                        <span class="text-[9px] font-bold text-purple-600 tracking-wider"
+                                            x-text="cls.section"></span>
+                                    </div>
+                                    <span
+                                        class="text-[8px] font-bold text-purple-600 uppercase tracking-tight">Section</span>
+                                </div>
+
+                                <!-- Teacher Badge -->
+                                <div
+                                    class="bg-amber-50 rounded-xl px-4 py-1.5 flex flex-col items-center justify-center min-w-[100px] border border-amber-100/50">
+                                    <div class="flex items-center gap-1.5 mb-0.5">
+                                        <i class="fa-solid fa-user-tie text-[9px] text-amber-500"></i>
+                                        <span class="text-[9px] font-bold text-amber-600 tracking-wider"
+                                            x-text="cls.classTeacher"></span>
+                                    </div>
+                                    <span
+                                        class="text-[8px] font-bold text-amber-600 uppercase tracking-tight">Teacher</span>
+                                </div>
+
+                                <!-- Subjects Badge -->
+                                <div
+                                    class="bg-rose-50 rounded-xl px-4 py-1.5 flex flex-col items-center justify-center min-w-[80px] border border-rose-100/50">
+                                    <div class="flex items-center gap-1.5 mb-0.5">
+                                        <i class="fa-solid fa-book text-[9px] text-rose-500"></i>
+                                        <span class="text-[9px] font-bold text-rose-600 tracking-wider"
+                                            x-text="cls.subjects.length"></span>
+                                    </div>
+                                    <span
+                                        class="text-[8px] font-bold text-rose-600 uppercase tracking-tight">Subjects</span>
+                                </div>
+
+                                <!-- Students Badge -->
+                                <div
+                                    class="bg-emerald-50 rounded-xl px-4 py-1.5 flex flex-col items-center justify-center min-w-[80px] border border-emerald-100/50">
+                                    <div class="flex items-center gap-1.5 mb-0.5">
+                                        <i class="fa-solid fa-users text-[9px] text-emerald-500"></i>
+                                        <span class="text-[9px] font-bold text-emerald-600 tracking-wider"
+                                            x-text="cls.students"></span>
+                                    </div>
+                                    <span
+                                        class="text-[8px] font-bold text-emerald-600 uppercase tracking-tight">Students</span>
+                                </div>
+
+                                <!-- Progress Badge -->
+                                <div
+                                    class="bg-blue-50 rounded-xl px-4 py-1.5 flex flex-col items-center justify-center min-w-[80px] border border-blue-100/50">
+                                    <div class="flex items-center gap-1.5 mb-0.5 text-blue-600">
+                                        <i class="fa-solid fa-graduation-cap text-[9px]"></i>
+                                        <span class="text-[9px] font-bold tracking-wider"
+                                            x-text="cls.overallProgress + '%'"></span>
+                                    </div>
+                                    <span
+                                        class="text-[8px] font-bold text-blue-600 uppercase tracking-tight">Progress</span>
+                                </div>
+                            </div>
+
+                            <!-- Right: Date & Action -->
+                            <div class="flex items-center gap-5 pl-6 flex-shrink-0">
+                                <!-- Updated Date Bubble -->
+                                <div
+                                    class="bg-slate-50 rounded-xl px-3 py-1.5 flex items-center gap-2 border border-slate-100">
+                                    <div
+                                        class="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]">
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span
+                                            class="text-[8px] font-bold text-slate-400 uppercase leading-none">Updated</span>
+                                        <span class="text-[10px] font-bold text-slate-600 mt-0.5"
+                                            x-text="cls.updatedAt"></span>
+                                    </div>
+                                </div>
+
+                                <!-- Action Button: Progress -->
+                                <button @click="viewClassSubjects(cls)"
+                                    class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl text-xs font-bold shadow-sm shadow-blue-200 transition-all hover:scale-105 active:scale-95">
+                                    Progress
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div> <!-- END CLASS LIST VIEW -->
+
+            <!-- SUBJECT OVERVIEW VIEW (Next Screen) -->
+            <!-- SUBJECT OVERVIEW -->
+            <div x-show="viewingSubjects" x-cloak>
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-4">
+                        <button @click="viewingSubjects = false"
+                            class="w-9 h-9 bg-white border border-slate-200 rounded-lg flex items-center justify-center text-slate-500 hover:bg-slate-50 hover:text-blue-600 transition-all shadow-sm group">
+                            <i
+                                class="fa-solid fa-arrow-left group-hover:-translate-x-0.5 transition-transform text-xs"></i>
+                        </button>
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-900 tracking-tight leading-none"
+                                x-text="viewingClass?.className + ' - Subjects Overview'"></h2>
+                            <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider mt-1.5">Curriculum
+                                progress & teacher allocation</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50/50 border-b border-slate-100">
+                                <th class="px-5 py-3 text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                                    Subject</th>
+                                <th
+                                    class="px-5 py-3 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">
+                                    Teacher</th>
+                                <th
+                                    class="px-5 py-3 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">
+                                    Status</th>
+                                <th class="px-5 py-3 text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                                    Progress</th>
+                                <th
+                                    class="px-5 py-3 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">
+                                    Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-50">
+                            <template x-for="sub in viewingClass?.subjects" :key="sub.id">
+                                <tr class="hover:bg-blue-50/20 transition-colors group">
+                                    <td class="px-5 py-2.5">
+                                        <div class="flex items-center gap-3 cursor-pointer"
+                                            @click="viewSubjectDetail(sub)">
+                                            <div
+                                                class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xs shadow-sm group-hover:bg-blue-600 group-hover:text-white transition-all">
+                                                <i class="fa-solid fa-book-bookmark"></i>
+                                            </div>
+                                            <div>
+                                                <div class="font-bold text-slate-800 text-[13px]" x-text="sub.name">
+                                                </div>
+                                                <div class="text-[9px] text-slate-400 font-bold uppercase tracking-wider"
+                                                    x-text="sub.chapters + ' Chapters'"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-5 py-2.5">
+                                        <div class="flex items-center justify-center gap-1.5">
+                                            <div
+                                                class="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 text-[9px]">
+                                                <i class="fa-solid fa-user"></i>
+                                            </div>
+                                            <span class="text-[12px] font-bold text-slate-600"
+                                                x-text="sub.teacher"></span>
+                                        </div>
+                                    </td>
+                                    <td class="px-5 py-2.5 text-center">
+                                        <div class="inline-flex px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-md text-[9px] font-black tracking-widest uppercase border border-emerald-100/50"
+                                            x-text="sub.completed + ' Completed'"></div>
+                                    </td>
+                                    <td class="px-5 py-2.5 w-56">
+                                        <div class="flex items-center gap-3">
+                                            <div
+                                                class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden p-px border border-slate-100 shadow-inner">
+                                                <div class="h-full bg-gradient-to-r from-blue-600 to-indigo-500 rounded-full transition-all duration-1000 ease-out"
+                                                    :style="`width: ${sub.progress}%`"></div>
+                                            </div>
+                                            <span class="text-[11px] font-black text-slate-700 w-8 text-right"
+                                                x-text="sub.progress + '%'"></span>
+                                        </div>
+                                    </td>
+                                    <td class="px-5 py-2.5">
+                                        <div class="flex items-center justify-end gap-1.5">
+                                            <button @click.stop="viewSubjectDetail(sub)"
+                                                class="w-8 h-8 rounded-lg flex items-center justify-center text-blue-600 bg-blue-50 border border-blue-100 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all shadow-sm hover:shadow-md">
+                                                <i class="fa-solid fa-eye text-[10px]"></i>
+                                            </button>
+                                            <button @click.stop="editSyllabus(sub)" x-show="currentRole === 'Admin'"
+                                                class="px-2.5 py-1.5 bg-blue-600 text-white rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-sm">
+                                                Edit Plan
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div> <!-- END SUBJECT OVERVIEW -->
+
+            <!-- DETAIL VIEW -->
+            <div x-show="viewingPlan" x-cloak>
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-5">
+                        <button @click="viewingPlan = null; viewingSubjects = true"
+                            class="w-9 h-9 bg-white border border-slate-200 rounded-lg flex items-center justify-center text-slate-500 hover:bg-slate-50 hover:text-blue-600 transition-all shadow-sm group">
+                            <i
+                                class="fa-solid fa-arrow-left group-hover:-translate-x-0.5 transition-transform text-xs"></i>
+                        </button>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h1 class="text-xl font-black text-slate-900 tracking-tight leading-none"
+                                    x-text="viewingPlan?.subject + ' Master Curriculum'"></h1>
+                                <span
+                                    class="px-2 py-0.5 bg-blue-100/50 text-blue-700 rounded-md text-[9px] font-black uppercase tracking-widest border border-blue-100"
+                                    x-text="viewingPlan?.class"></span>
+                            </div>
+                            <div
+                                class="flex items-center gap-3 mt-1.5 text-slate-400 font-bold uppercase text-[9px] tracking-wider">
+                                <div class="flex items-center gap-1">
+                                    <i class="fa-solid fa-chalkboard-user opacity-50"></i>
+                                    <span x-text="viewingPlan?.teacher"></span>
+                                </div>
+                                <div class="w-0.5 h-0.5 rounded-full bg-slate-300"></div>
+                                <div class="flex items-center gap-1">
+                                    <i class="fa-solid fa-calendar opacity-50"></i>
+                                    <span>Session 2024-25</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Master Progress Ribbon -->
+                <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm mb-6 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-blue-600/[0.03] pointer-events-none"></div>
+                    <div class="flex items-center gap-8 relative z-10">
+                        <div class="flex items-center gap-3 pr-8 border-r border-slate-100">
+                            <div
+                                class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white text-xs">
+                                <i class="fa-solid fa-chart-line"></i>
+                            </div>
+                            <div>
+                                <div class="text-xs font-black text-slate-400 uppercase tracking-widest mb-0.5">Coverage
+                                </div>
+                                <div class="text-2xl font-black text-slate-900 leading-none"
+                                    x-text="viewingPlan?.progress + '%'"></div>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div
+                                class="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden p-px border border-slate-100 shadow-inner">
+                                <div class="h-full bg-gradient-to-r from-blue-600 to-indigo-500 rounded-full transition-all duration-1000 ease-out shadow-sm"
+                                    :style="`width: ${viewingPlan?.progress}%`"></div>
+                            </div>
+                            <div class="flex items-center justify-between mt-2.5">
+                                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest"
+                                    x-text="`${viewingPlan?.chapters} Chapters Recorded`"></span>
+                                <div class="flex gap-1.5">
+                                    <span
+                                        class="px-2 py-0.5 bg-emerald-50 text-emerald-600 border border-emerald-100/50 rounded-md text-[9px] font-black uppercase tracking-widest">On
+                                        Schedule</span>
+                                    <span
+                                        class="px-2 py-0.5 bg-amber-50 text-amber-600 border border-amber-100/50 rounded-md text-[9px] font-black uppercase tracking-widest">Revised:
+                                        May 24</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chapter Progress List -->
+                <div class="grid grid-cols-1 gap-3">
+                    <template x-for="ch in teacherChapters" :key="ch.id">
+                        <div
+                            class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden group hover:border-blue-200 transition-all duration-300">
+                            <!-- Chapter Header (Progress) -->
+                            <div class="px-5 py-3 bg-slate-50/30 border-b border-slate-100 flex justify-between items-center cursor-pointer hover:bg-white transition-colors"
+                                @click="ch.expanded = !ch.expanded">
+                                <div class="flex-1">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-3">
+                                            <div
+                                                class="w-7 h-7 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:text-blue-600 group-hover:border-blue-100 transition-all">
+                                                <i class="fa-solid fa-chevron-down text-[8px] transition-transform"
+                                                    :class="ch.expanded ? 'rotate-180' : ''"></i>
+                                            </div>
+                                            <div>
+                                                <h3 class="font-bold text-slate-800 text-[14px] group-hover:text-blue-600 transition-colors"
+                                                    x-text="ch.name"></h3>
+                                                <div
+                                                    class="flex items-center gap-2 text-[9px] font-black text-slate-400 uppercase tracking-widest mt-0.5">
+                                                    <span x-text="`${ch.days} Days`"></span>
+                                                    <div class="w-0.5 h-0.5 rounded-full bg-slate-200"></div>
+                                                    <span x-text="ch.status"
+                                                        :class="ch.status === 'Completed' ? 'text-emerald-500' : 'text-blue-500'"></span>
+                                                </div>
+                                                <div x-show="ch.reason"
+                                                    class="mt-1 text-[10px] text-slate-500 font-medium leading-snug">
+                                                    <span
+                                                        class="font-black uppercase tracking-widest text-amber-600">Reason
+                                                        from Teacher:</span>
+                                                    <span class="mx-1.5 text-slate-300">•</span>
+                                                    <span x-text="ch.reason"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="flex items-center gap-5">
+                                            <div class="flex items-center gap-2.5">
+                                                <div class="w-32 h-1 bg-slate-200 rounded-full overflow-hidden">
+                                                    <div class="h-full rounded-full transition-all duration-500"
+                                                        :class="ch.progress === 100 ? 'bg-emerald-500' : 'bg-blue-600'"
+                                                        :style="`width: ${ch.progress}%`"></div>
+                                                </div>
+                                                <span class="text-[11px] font-black text-slate-700 w-8"
+                                                    x-text="`${ch.progress}%`"></span>
+                                            </div>
+
+                                            <div class="flex items-center gap-2 pr-2 border-r border-slate-100">
+                                                <div class="flex -space-x-1 overflow-hidden">
+                                                    <template x-for="t in ch.topics.slice(0, 4)">
+                                                        <div class="w-3.5 h-3.5 rounded-full border border-white"
+                                                            :class="getDotColor(t.status)"></div>
+                                                    </template>
+                                                </div>
+                                                <span
+                                                    class="text-[9px] text-slate-400 font-black uppercase tracking-widest"
+                                                    x-text="`${ch.topics.filter(t => t.status === 'Completed').length}/${ch.topics.length} Units`"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Chapter Topics -->
+                            <div x-show="ch.expanded" x-collapse class="bg-white">
+                                <div class="px-5 py-1.5">
+                                    <template x-for="(topic, index) in ch.topics" :key="topic.id">
+                                        <div
+                                            class="flex items-center justify-between py-2 border-b border-slate-50 last:border-0 hover:bg-slate-50/50 rounded-lg transition-colors px-3 -mx-3">
+                                            <div class="flex items-center gap-4">
+                                                <div class="text-[9px] font-black text-slate-300 w-3 tracking-tighter"
+                                                    x-text="(index + 1) < 10 ? '0' + (index + 1) : (index + 1)"></div>
+                                                <div class="w-1.5 h-1.5 rounded-full ring-2 ring-white shadow-sm"
+                                                    :class="getDotColor(topic.status)"></div>
+                                                <div class="text-[12px] font-bold text-slate-600" x-text="topic.name">
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center gap-3">
+                                                <span
+                                                class="text-[8px] font-black tracking-widest uppercase px-1.5 py-0.5 rounded-md border"
+                                                :class="topic.status === 'Completed' ? (topic.isOnTime ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-red-50 text-red-600 border-red-100') : 'bg-slate-50 text-slate-400 border-slate-100'"
+                                                x-text="topic.status"></span>
+                                                <i x-show="topic.status === 'Completed'"
+                                                    class="fa-solid fa-circle-check text-emerald-500 text-[10px]"></i>
+                                            <span x-show="topic.status === 'Completed' && topic.reason"
+                                                class="text-[9px] text-slate-500 font-medium"
+                                                x-text="topic.reason"></span>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+
+                                <!-- Teacher Action: Add Topic -->
+                                <div x-show="currentRole === 'Teacher'"
+                                    class="mx-5 mb-4 mt-1 p-3 bg-blue-50/50 rounded-xl border border-dashed border-blue-200 hover:border-blue-400 hover:bg-blue-50 transition-all cursor-pointer group text-center"
+                                    @click.stop="addTopicToChapter(ch)">
+                                    <div
+                                        class="text-[9px] font-black text-blue-600 uppercase tracking-widest flex items-center justify-center gap-2">
+                                        <i class="fa-solid fa-plus-circle text-sm opacity-50"></i>
+                                        Add Custom Sub-topic
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div> <!-- END DETAIL VIEW -->
+
+        </div>
+
+    </main>
+    <!-- CREATE PLAN MODAL (ADMIN ONLY) -->
+    <div x-show="planModal" x-cloak
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden transform transition-all"
+            @click.stop>
+
+            <!-- Modal Header -->
+            <div class="px-8 py-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                <div class="flex items-center gap-4">
+                    <div
+                        class="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-200">
+                        <i class="fa-solid fa-file-signature text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800">Syllabus Planner</h3>
+                        <div class="flex items-center gap-2 mt-1">
+                            <div class="flex items-center gap-1.5">
+                                <span
+                                    class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold transition-colors"
+                                    :class="planStep >= 1 ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'">1</span>
+                                <span class="text-xs font-bold"
+                                    :class="planStep >= 1 ? 'text-blue-600' : 'text-slate-400'">Basic Info</span>
+                            </div>
+                            <div class="w-8 h-[1px] bg-slate-200 mx-1"></div>
+                            <div class="flex items-center gap-1.5">
+                                <span
+                                    class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold transition-colors"
+                                    :class="planStep >= 2 ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'">2</span>
+                                <span class="text-xs font-bold"
+                                    :class="planStep >= 2 ? 'text-blue-600' : 'text-slate-400'">Curriculum</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button @click="planModal=false"
+                    class="w-10 h-10 rounded-xl hover:bg-white hover:text-red-500 transition-all text-slate-400 flex items-center justify-center border border-transparent hover:border-slate-100">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- STEP 1: BASIC INFO -->
+            <div x-show="planStep === 1" class="p-10">
+                <div class="grid grid-cols-2 gap-8">
+                    <!-- Academic Session -->
+                    <div class="bg-slate-50/50 p-6 rounded-3xl border border-slate-100/80">
+                        <div class="flex items-center gap-3 mb-5">
+                            <div
+                                class="w-8 h-8 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-xs">
+                                <i class="fa-solid fa-calendar-days"></i>
+                            </div>
+                            <h4 class="font-bold text-slate-700 text-sm tracking-tight">Timeline Settings</h4>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <label
+                                    class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Academic
+                                    Session</label>
+                                <div class="relative group">
+                                    <select x-model="newPlan.session"
+                                        class="w-full bg-white border border-slate-200 rounded-2xl text-sm p-3.5 outline-none shadow-sm text-slate-600 focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 transition-all appearance-none cursor-pointer">
+                                        <option value="">Select Session</option>
+                                        <option>2024-2025</option>
+                                        <option>2025-2026</option>
+                                    </select>
+                                    <i
+                                        class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 text-[10px] pointer-events-none group-hover:text-blue-500"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Academic Mapping -->
+                    <div class="bg-slate-50/50 p-6 rounded-3xl border border-slate-100/80">
+                        <div class="flex items-center gap-3 mb-5">
+                            <div
+                                class="w-8 h-8 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center text-xs">
+                                <i class="fa-solid fa-sitemap"></i>
+                            </div>
+                            <h4 class="font-bold text-slate-700 text-sm tracking-tight">Academic Scope</h4>
+                        </div>
+                        <div class="space-y-5">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label
+                                        class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Class</label>
+                                    <div class="relative group">
+                                        <select x-model="newPlan.class"
+                                            class="w-full bg-white border border-slate-200 rounded-2xl text-sm p-3.5 outline-none shadow-sm text-slate-600 focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 transition-all appearance-none cursor-pointer">
+                                            <option value="">Choose Class</option>
+                                            <option>Class 9</option>
+                                            <option>Class 10</option>
+                                            <option>Class 11</option>
+                                            <option>Class 12</option>
+                                        </select>
+                                        <i
+                                            class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 text-[10px] pointer-events-none group-hover:text-blue-500"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Section</label>
+                                    <div class="relative group">
+                                        <select
+                                            class="w-full bg-white border border-slate-200 rounded-2xl text-sm p-3.5 outline-none shadow-sm text-slate-600 focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 transition-all appearance-none cursor-pointer">
+                                            <option value="">All Sections</option>
+                                            <option>Section A</option>
+                                            <option>Section B</option>
+                                            <option>Section C</option>
+                                        </select>
+                                        <i
+                                            class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 text-[10px] pointer-events-none group-hover:text-blue-500"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <label
+                                    class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Subject</label>
+                                <div class="relative group">
+                                    <select x-model="newPlan.subject"
+                                        class="w-full bg-white border border-slate-200 rounded-2xl text-sm p-3.5 outline-none shadow-sm text-slate-600 focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 transition-all appearance-none cursor-pointer">
+                                        <option value="">Select Subject</option>
+                                        <option>Mathematics</option>
+                                        <option>Science</option>
+                                        <option>English</option>
+                                    </select>
+                                    <i
+                                        class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 text-[10px] pointer-events-none group-hover:text-blue-500"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex items-center gap-4 bg-blue-50/50 p-4 rounded-2xl border border-blue-100/50">
+                    <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-blue-600 shadow-sm">
+                        <i class="fa-solid fa-circle-info"></i>
+                    </div>
+                    <p class="text-[11px] text-slate-500 leading-relaxed font-medium">
+                        Ensure you select the correct session and class mapping. The chapters and topics defined in the
+                        next step will be locked to this combination.
+                    </p>
+                </div>
+            </div>
+
+            <!-- STEP 2: CHAPTER & TOPIC PLANNER -->
+            <div x-show="planStep === 2" class="p-0 h-[500px] flex flex-col bg-gray-50">
+                <!-- Chapter & Topic Planner content here -->
+                <div class="flex-1 overflow-y-auto p-6 space-y-4">
+                    <template x-for="(ch, cIndex) in newPlan.chapters" :key="ch.id">
+                        <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+                            <!-- Chapter Header -->
+                            <div class="p-5 bg-slate-50/80 border-b border-slate-100 flex gap-5 items-start">
+                                <div class="flex-1">
+                                    <label
+                                        class="block text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-wider">Chapter
+                                        Name</label>
+                                    <input type="text" x-model="ch.name" placeholder="E.g. Real Numbers"
+                                        class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold text-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 outline-none transition-all">
+                                </div>
+                                <div class="w-36">
+                                    <label
+                                        class="block text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-wider">Duration
+                                        (Days)</label>
+                                    <input type="number" x-model="ch.duration"
+                                        class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold text-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 outline-none transition-all text-center">
+                                </div>
+                                <button @click="removeChapter(cIndex)"
+                                    class="mt-8 w-10 h-10 rounded-xl flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all border border-transparent hover:border-red-100">
+                                    <i class="fa-regular fa-trash-can"></i>
+                                </button>
+                            </div>
+
+                            <!-- Topics Section -->
+                            <div class="p-5 bg-white">
+                                <div class="space-y-4">
+                                    <template x-for="(topic, tIndex) in ch.topics" :key="topic.id">
+                                        <div class="flex items-center gap-4 pl-4 border-l-2 border-slate-100 group">
+                                            <div
+                                                class="w-2 h-2 rounded-full bg-slate-200 group-focus-within:bg-blue-500 transition-colors">
+                                            </div>
+                                            <input type="text" x-model="topic.name"
+                                                placeholder="Topic name (e.g. Fundamental Theorem)"
+                                                class="flex-1 border-0 border-b border-slate-100 py-2 text-sm font-medium text-slate-600 focus:ring-0 focus:border-blue-500 placeholder-slate-300 transition-all">
+
+                                            <div
+                                                class="flex items-center gap-2 bg-slate-50 rounded-lg px-3 py-1 border border-slate-100 focus-within:border-blue-500 transition-all">
+                                                <input type="number" x-model.number="topic.duration" min="1"
+                                                    class="w-10 border-0 bg-transparent py-1 text-center text-sm font-bold text-slate-600 focus:ring-0">
+                                                <span class="text-[10px] text-slate-400 font-bold uppercase">Days</span>
+                                            </div>
+                                            <!-- Status Badge -->
+                                            <span x-text="topic.status"
+                                                :class="{ 'bg-emerald-50 text-emerald-600 border border-emerald-100': topic.status === 'Completed' && topic.isOnTime, 'bg-red-50 text-red-600 border border-red-100': topic.status === 'Completed' && !topic.isOnTime, 'bg-blue-50 text-blue-600 border border-blue-100': topic.status === 'In Progress' }"
+                                                class="px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest"></span>
+                                            <!-- Reason from Teacher -->
+                                            <div x-show="topic.reason" class="text-[9px] text-slate-500"
+                                                x-text="'Reason: ' + topic.reason"></div>
+
+                                            <button @click="removeTopic(cIndex, tIndex)"
+                                                class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-200 hover:text-red-500 hover:bg-red-50 transition-all">
+                                                <i class="fa-solid fa-circle-xmark"></i>
+                                            </button>
+                                        </div>
+                                    </template>
+                                </div>
+                                <button @click="addTopic(cIndex)"
+                                    class="mt-4 ml-6 text-[11px] font-bold text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-xl transition-all flex items-center gap-2 border border-transparent hover:border-blue-100">
+                                    <i class="fa-solid fa-plus text-[9px]"></i> Add Sub-topic
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+
+                    <button @click="addChapter()"
+                        class="w-full py-5 border-2 border-dashed border-slate-200 rounded-3xl text-slate-400 font-bold text-sm hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50/30 transition-all flex flex-col items-center gap-1 group">
+                        <i class="fa-solid fa-circle-plus text-xl group-hover:scale-110 transition-transform"></i>
+                        <span>Add New Chapter to Syllabus</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div
+                class="px-8 py-6 bg-slate-50/50 border-t border-gray-100 flex justify-between items-center relative z-20">
+                <div class="flex items-center gap-3">
+                    <button x-show="planStep === 2" @click="planStep = 1"
+                        class="px-5 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-2xl text-xs font-bold hover:bg-slate-50 hover:border-slate-300 transition-all flex items-center gap-2 shadow-sm">
+                        <i class="fa-solid fa-chevron-left text-[10px]"></i> Go Back
+                    </button>
+                    <div x-show="planStep === 1" class="text-[11px] text-slate-400 font-medium italic">All fields are
+                        mandatory to proceed</div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button @click="planModal=false"
+                        class="px-5 py-2.5 text-slate-400 hover:text-slate-600 text-xs font-bold transition-all">Cancel</button>
+
+                    <button x-show="planStep === 1" @click="planStep = 2"
+                        class="px-8 py-3 bg-blue-600 text-white rounded-2xl text-xs font-bold shadow-lg shadow-blue-200 transition-all hover:scale-105 active:scale-95 flex items-center gap-3">
+                        Continue to Curriculum <i class="fa-solid fa-circle-arrow-right"></i>
+                    </button>
+
+                    <button x-show="planStep === 2" @click="validateAndSavePlan()"
+                        class="px-8 py-3 bg-blue-600 text-white rounded-2xl text-xs font-bold shadow-lg shadow-blue-200 transition-all hover:scale-105 active:scale-95 flex items-center gap-3">
+                        Publish Syllabus Plan <i class="fa-solid fa-cloud-arrow-up"></i>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+
+</html>

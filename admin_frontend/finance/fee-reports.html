@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fee Reports | Hybrid School ERP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+            color: #111827;
+        }
+
+        .sidebar-rail {
+            background-color: #ffffff;
+            border-right: 1px solid #f1f5f9;
+            color: #64748b;
+            z-index: 50;
+        }
+
+        .sidebar-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 0;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            width: 100%;
+            text-decoration: none;
+        }
+
+        .sidebar-item:hover {
+            color: #3b82f6;
+            background-color: #f8fafc;
+        }
+
+        .sidebar-item.active {
+            color: #2563eb;
+            background-color: #eff6ff;
+        }
+
+        .sidebar-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background-color: #2563eb;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .sidebar-icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-label {
+            font-size: 11px;
+            text-align: center;
+            line-height: 1.2;
+            font-weight: 600;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body x-data="feeReportsApp()" class="flex h-screen overflow-hidden">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar-rail w-[84px] flex flex-col flex-shrink-0 z-50 h-full shadow-sm relative">
+        <div class="h-[76px] flex items-center justify-center border-b border-slate-100 flex-shrink-0">
+            <div
+                class="w-11 h-11 bg-[#2563eb] rounded-xl flex items-center justify-center text-white font-extrabold text-2xl shadow-sm">
+                H</div>
+        </div>
+        <div class="px-3 mb-5 mt-4">
+            <button
+                class="w-full py-3.5 bg-[#eff6ff] text-[#2563eb] hover:bg-blue-100 rounded-2xl flex flex-col items-center justify-center transition-colors border border-blue-100/50 shadow-sm">
+                <i class="fa-solid fa-rocket text-[17px] mb-1.5"></i>
+                <span class="text-[10px] font-bold text-center leading-tight">Quick<br>Start</span>
+            </button>
+        </div>
+        <nav class="flex-1 pb-4 overflow-y-auto flex flex-col items-center">
+            <a href="../index.html" class="sidebar-item"><i class="fa-solid fa-gauge-high sidebar-icon"></i><span
+                    class="sidebar-label">Home</span></a>
+            <a href="#" class="sidebar-item"><i class="fa-solid fa-bell-concierge sidebar-icon"></i><span
+                    class="sidebar-label">Front<br>Office</span></a>
+            <a href="#" class="sidebar-item"><i class="fa-solid fa-user-plus sidebar-icon"></i><span
+                    class="sidebar-label">Admit</span></a>
+            <a href="#" class="sidebar-item"><i class="fa-solid fa-graduation-cap sidebar-icon"></i><span
+                    class="sidebar-label">Student</span></a>
+            <a href="../index.html?module=academics" class="sidebar-item"><i
+                    class="fa-solid fa-book-open sidebar-icon"></i><span class="sidebar-label">Academia</span></a>
+
+            <a href="#" class="sidebar-item"><i class="fa-solid fa-users-gear sidebar-icon"></i><span
+                    class="sidebar-label">HR</span></a>
+            <a href="index.html" class="sidebar-item active"><i class="fa-solid fa-coins sidebar-icon"></i><span
+                    class="sidebar-label">Finance</span></a>
+        </nav>
+        <div class="mt-auto pb-6 pt-4 border-t border-slate-100 flex-shrink-0">
+            <a href="#" class="sidebar-item !py-2"><i class="fa-solid fa-gear sidebar-icon"></i><span
+                    class="sidebar-label">Settings</span></a>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden relative bg-gray-50">
+        <div class="flex-1 overflow-y-auto p-8">
+
+            <!-- Page Title -->
+            <div class="flex justify-between items-start mb-6">
+                <div class="flex items-center gap-4">
+                    <a href="index.html"
+                        class="flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition-colors"
+                        title="Back to Finance">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </a>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">Fee Reports</h1>
+                        <p class="text-gray-500 text-sm mt-1">Monitor financial health and student payment status</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPI Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-6">
+                <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Total Fee Expected</p>
+                    <p class="text-2xl font-black text-gray-800">Rs. 4,85,000</p>
+                    <p class="text-[11px] text-gray-400 mt-1">Session 2025-26</p>
+                </div>
+                <div class="bg-white p-5 rounded-xl border border-emerald-200 shadow-sm">
+                    <p class="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mb-2">Total Collected</p>
+                    <p class="text-2xl font-black text-emerald-700">Rs. 3,40,000</p>
+                    <p class="text-[11px] text-emerald-400 mt-1">70.1% collected</p>
+                </div>
+                <div class="bg-white p-5 rounded-xl border border-red-200 shadow-sm">
+                    <p class="text-[10px] font-bold text-red-500 uppercase tracking-widest mb-2">Pending Amount</p>
+                    <p class="text-2xl font-black text-red-700">Rs. 1,45,000</p>
+                    <p class="text-[11px] text-red-400 mt-1">29.9% outstanding</p>
+                </div>
+                <div class="bg-white p-5 rounded-xl border border-amber-200 shadow-sm">
+                    <p class="text-[10px] font-bold text-amber-500 uppercase tracking-widest mb-2">Overdue</p>
+                    <p class="text-2xl font-black text-amber-700">Rs. 52,000</p>
+                    <p class="text-[11px] text-amber-400 mt-1">12 students</p>
+                </div>
+            </div>
+
+            <!-- Filters & Export -->
+            <div
+                class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-6 flex flex-wrap items-center gap-4">
+                <div class="flex items-center gap-2"><label
+                        class="text-xs font-bold text-gray-500 uppercase">Session:</label>
+                    <select class="bg-white border border-gray-200 text-gray-700 text-sm rounded-lg p-2 outline-none">
+                        <option>2025-26</option>
+                        <option>2024-25</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-2"><label
+                        class="text-xs font-bold text-gray-500 uppercase">Class:</label>
+                    <select x-model="filterClass"
+                        class="bg-white border border-gray-200 text-gray-700 text-sm rounded-lg p-2 outline-none">
+                        <option value="All">All Classes</option>
+                        <option value="Class 9">Class 9</option>
+                        <option value="Class 10">Class 10</option>
+                        <option value="Class 11">Class 11</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-2"><label
+                        class="text-xs font-bold text-gray-500 uppercase">Status:</label>
+                    <select x-model="filterStatus"
+                        class="bg-white border border-gray-200 text-gray-700 text-sm rounded-lg p-2 outline-none">
+                        <option value="All">All</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Cleared">Cleared</option>
+                    </select>
+                </div>
+                <div class="ml-auto flex gap-2">
+                    <button
+                        class="px-4 py-2 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-700 flex items-center gap-2"><i
+                            class="fa-solid fa-file-excel"></i> Excel</button>
+                    <button
+                        class="px-4 py-2 bg-red-600 text-white text-xs font-bold rounded-lg hover:bg-red-700 flex items-center gap-2"><i
+                            class="fa-solid fa-file-pdf"></i> PDF</button>
+                </div>
+            </div>
+
+            <!-- Report Table -->
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                <table class="w-full text-sm text-left text-gray-500">
+                    <thead class="text-xs text-gray-500 uppercase bg-gray-50 border-b border-gray-100">
+                        <tr>
+                            <th class="px-6 py-4 font-bold">Student</th>
+                            <th class="px-6 py-4 font-bold">Class</th>
+                            <th class="px-6 py-4 font-bold">Total Fee</th>
+                            <th class="px-6 py-4 font-bold">Paid</th>
+                            <th class="px-6 py-4 font-bold text-center">Pending</th>
+                            <th class="px-6 py-4 font-bold text-right">Details</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        <template x-for="s in filteredStudents()" :key="s.id">
+                            <tr class="hover:bg-gray-50 transition-colors cursor-pointer" @click="openDetail(s)">
+                                <td class="px-6 py-4">
+                                    <div class="font-bold text-gray-900" x-text="s.name"></div>
+                                    <div class="text-[10px] text-gray-400 font-mono" x-text="s.id"></div>
+                                </td>
+                                <td class="px-6 py-4" x-text="s.class + '-' + s.section"></td>
+                                <td class="px-6 py-4 font-bold text-gray-700"
+                                    x-text="'Rs.  ' + s.totalFee.toLocaleString()"></td>
+                                <td class="px-6 py-4 font-bold text-emerald-600"
+                                    x-text="'Rs.  ' + s.paid.toLocaleString()"></td>
+                                <td class="px-6 py-4 text-center">
+                                    <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase border"
+                                        :class="s.pending > 0 ? 'bg-red-50 text-red-600 border-red-200' : 'bg-emerald-50 text-emerald-600 border-emerald-200'"
+                                        x-text="s.pending > 0 ? 'Rs.  ' + s.pending.toLocaleString() : 'Cleared'"></span>
+                                </td>
+                                <td class="px-6 py-4 text-right"><button
+                                        class="text-blue-500 hover:text-blue-700 p-2 rounded-lg hover:bg-blue-50"><i
+                                            class="fa-solid fa-chevron-right"></i></button></td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- STUDENT DETAIL SLIDE-OVER -->
+    <div x-show="showDetail" x-cloak class="fixed inset-0 z-[100] flex justify-end bg-gray-900/40 backdrop-blur-sm"
+        @click="showDetail = false">
+        <div class="w-full max-w-md bg-white h-full shadow-2xl flex flex-col" @click.stop
+            x-transition:enter="transition ease-out duration-300" x-transition:enter-start="translate-x-full"
+            x-transition:enter-end="translate-x-0" x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full">
+            <div class="p-6 border-b border-gray-200 flex justify-between items-center shrink-0">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900" x-text="selectedStudent?.name"></h3>
+                    <p class="text-xs text-gray-500"
+                        x-text="selectedStudent?.id + ' | ' + selectedStudent?.class + '-' + selectedStudent?.section">
+                    </p>
+                </div>
+                <button @click="showDetail = false"
+                    class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-200"><i
+                        class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-6 custom-scrollbar">
+                <div class="grid grid-cols-3 gap-3 mb-6">
+                    <div class="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase mb-1">Total</p>
+                        <p class="font-bold text-gray-800 text-sm"
+                            x-text="selectedStudent ? 'Rs.  ' + selectedStudent.totalFee.toLocaleString() : ''"></p>
+                    </div>
+                    <div class="bg-emerald-50 p-3 rounded-lg border border-emerald-100">
+                        <p class="text-[10px] font-bold text-emerald-500 uppercase mb-1">Paid</p>
+                        <p class="font-bold text-emerald-700 text-sm"
+                            x-text="selectedStudent ? 'Rs.  ' + selectedStudent.paid.toLocaleString() : ''"></p>
+                    </div>
+                    <div class="p-3 rounded-lg border"
+                        :class="selectedStudent?.pending > 0 ? 'bg-red-50 border-red-100' : 'bg-emerald-50 border-emerald-100'">
+                        <p class="text-[10px] font-bold uppercase mb-1"
+                            :class="selectedStudent?.pending > 0 ? 'text-red-500' : 'text-emerald-500'"
+                            x-text="selectedStudent?.pending > 0 ? 'Pending' : 'Status'"></p>
+                        <p class="font-bold text-sm"
+                            :class="selectedStudent?.pending > 0 ? 'text-red-700' : 'text-emerald-700'"
+                            x-text="selectedStudent ? (selectedStudent.pending > 0 ? 'Rs.  ' + selectedStudent.pending.toLocaleString() : 'Cleared') : ''">
+                        </p>
+                    </div>
+                </div>
+                <h4 class="font-bold text-gray-800 text-sm uppercase tracking-wide mb-3 border-b border-gray-100 pb-2">
+                    Payment History</h4>
+                <div class="space-y-3">
+                    <template x-for="h in selectedStudent?.history" :key="h.rcptNo">
+                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-bold text-gray-900 text-sm" x-text="h.rcptNo"></span>
+                                <span class="font-bold text-emerald-700"
+                                    x-text="'Rs.  ' + h.amount.toLocaleString()"></span>
+                            </div>
+                            <div class="flex gap-3 text-[10px] text-gray-500 font-bold uppercase">
+                                <span x-text="h.date"></span>
+                                <span x-text="h.mode"></span>
+                                <span x-show="h.ref" x-text="h.ref" class="text-gray-400 font-mono"></span>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function feeReportsApp() {
+            return {
+                filterClass: 'All', filterStatus: 'All',
+                showDetail: false, selectedStudent: null,
+                students: [
+                    { id: 'STU001', name: 'Alex Johnson', class: 'Class 10', section: 'A', totalFee: 50000, paid: 35000, pending: 15000, history: [{ rcptNo: 'RCPT-8001', date: '10/01/2026', amount: 20000, mode: 'UPI', ref: 'UPI8291' }, { rcptNo: 'RCPT-7801', date: '01/12/2025', amount: 15000, mode: 'Cash', ref: '' }] },
+                    { id: 'STU002', name: 'Priya Sharma', class: 'Class 10', section: 'A', totalFee: 50000, paid: 50000, pending: 0, history: [{ rcptNo: 'RCPT-8010', date: '05/01/2026', amount: 50000, mode: 'Bank Transfer', ref: 'NEFT221' }] },
+                    { id: 'STU003', name: 'Rahul Patel', class: 'Class 9', section: 'B', totalFee: 45000, paid: 20000, pending: 25000, history: [{ rcptNo: 'RCPT-7900', date: '15/12/2025', amount: 20000, mode: 'Cash', ref: '' }] },
+                    { id: 'STU004', name: 'Sneha Kumar', class: 'Class 9', section: 'A', totalFee: 45000, paid: 45000, pending: 0, history: [{ rcptNo: 'RCPT-7850', date: '10/11/2025', amount: 25000, mode: 'UPI', ref: 'UPI6621' }, { rcptNo: 'RCPT-7710', date: '01/10/2025', amount: 20000, mode: 'Cash', ref: '' }] },
+                    { id: 'STU005', name: 'Amit Singh', class: 'Class 10', section: 'B', totalFee: 50000, paid: 10000, pending: 40000, history: [{ rcptNo: 'RCPT-7700', date: '20/10/2025', amount: 10000, mode: 'Cash', ref: '' }] },
+                    { id: 'STU006', name: 'Kavita Reddy', class: 'Class 9', section: 'C', totalFee: 45000, paid: 30000, pending: 15000, history: [{ rcptNo: 'RCPT-7950', date: '20/01/2026', amount: 15000, mode: 'Cheque', ref: 'CHQ551' }, { rcptNo: 'RCPT-7800', date: '05/12/2025', amount: 15000, mode: 'Cash', ref: '' }] },
+                    { id: 'STU007', name: 'Ravi Gupta', class: 'Class 11', section: 'A', totalFee: 60000, paid: 60000, pending: 0, history: [{ rcptNo: 'RCPT-8050', date: '15/01/2026', amount: 30000, mode: 'UPI', ref: 'UPI9912' }, { rcptNo: 'RCPT-7600', date: '01/09/2025', amount: 30000, mode: 'Cash', ref: '' }] },
+                    { id: 'STU008', name: 'Meera Das', class: 'Class 11', section: 'B', totalFee: 60000, paid: 40000, pending: 20000, history: [{ rcptNo: 'RCPT-8030', date: '12/01/2026', amount: 20000, mode: 'Cash', ref: '' }, { rcptNo: 'RCPT-7500', date: '15/08/2025', amount: 20000, mode: 'Card', ref: 'TXN881' }] },
+                    { id: 'STU009', name: 'Suresh Nair', class: 'Class 10', section: 'A', totalFee: 50000, pid: 50000, pending: 0, paid: 50000, history: [{ rcptNo: 'RCPT-8060', date: '20/01/2026', amount: 50000, mode: 'Bank Transfer', ref: 'NEFT331' }] },
+                    { id: 'STU010', name: 'Ananya Iyer', class: 'Class 9', section: 'A', totalFee: 45000, paid: 15000, pending: 30000, history: [{ rcptNo: 'RCPT-7880', date: '05/01/2026', amount: 15000, mode: 'Cash', ref: '' }] },
+                ],
+                filteredStudents() {
+                    return this.students.filter(s => {
+                        let matchClass = this.filterClass === 'All' || s.class === this.filterClass;
+                        let matchStatus = this.filterStatus === 'All' || (this.filterStatus === 'Pending' && s.pending > 0) || (this.filterStatus === 'Cleared' && s.pending === 0);
+                        return matchClass && matchStatus;
+                    });
+                },
+                openDetail(s) { this.selectedStudent = s; this.showDetail = true; }
+            };
+        }
+    </script>
+</body>
+
+</html>

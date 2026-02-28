@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academic Calendar | Hybrid School ERP</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            padding: 0.6rem 1rem;
+            color: #64748b;
+            font-weight: 500;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .sidebar-link:hover {
+            color: #0f172a;
+            background-color: #f1f5f9;
+        }
+
+        .module-active {
+            background-color: #eff6ff !important;
+            color: #2563eb !important;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .calendar-grid {
+            border: 1px solid #f1f5f9;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+            gap: 1px;
+            background-color: #e2e8f0;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            flex: 1;
+        }
+
+        .calendar-header-cell {
+            background-color: #ffffff;
+            color: #64748b;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .calendar-day-cell {
+            background-color: white;
+            min-height: 120px;
+            padding: 8px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .calendar-day-cell:hover {
+            background-color: #f8fafc;
+        }
+
+        .calendar-day-cell.is-other-month {
+            background-color: #fafafa;
+        }
+
+        .calendar-day-cell.is-other-month .day-number {
+            color: #cbd5e1;
+        }
+
+        .day-number {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #334155;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 4px;
+            border-radius: 50%;
+        }
+
+        .is-today .day-number {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        /* Toggles */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #3b82f6;
+        }
+
+        .toggle-checkbox:checked+.toggle-label {
+            background-color: #3b82f6;
+        }
+
+        .add-btn {
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .calendar-day-cell:hover .add-btn {
+            opacity: 1;
+        }
+
+        .event-bar {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            border: 1px solid transparent;
+        }
+
+        .event-holiday {
+            background-color: #fee2e2;
+            color: #b91c1c;
+            border-color: #fecaca;
+        }
+
+        .event-exam {
+            background-color: #fef3c7;
+            color: #b45309;
+            border-color: #fde68a;
+        }
+
+        .event-event {
+            background-color: #f3e8ff;
+            color: #6b21a8;
+            border-color: #e9d5ff;
+        }
+    
+        /* Narrow Rail Styles */
+        .sidebar-rail {
+            background-color: #ffffff;
+            border-right: 1px solid #f1f5f9;
+            color: #64748b;
+            z-index: 50;
+        }
+
+        .sidebar-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 0;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            width: 100%;
+        }
+
+        .sidebar-item:hover {
+            color: #3b82f6;
+            background-color: #f8fafc;
+        }
+
+        .sidebar-item.active {
+            color: #2563eb;
+            background-color: #eff6ff;
+        }
+
+        .sidebar-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background-color: #2563eb;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .sidebar-icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-label {
+            font-size: 11px;
+            text-align: center;
+            line-height: 1.2;
+            font-weight: 600;
+        }
+
+        
+    </style>
+</head>
+
+<body x-data="calendarApp()" class="flex h-screen overflow-hidden text-slate-800">
+
+    <!-- 1. NARROW RAIL SIDEBAR -->
+    <aside class="sidebar-rail w-[84px] flex flex-col flex-shrink-0 z-50 h-full shadow-sm relative">
+
+        <!-- Logo -->
+        <div class="h-[76px] flex items-center justify-center border-b border-slate-100 flex-shrink-0">
+            <div
+                class="w-11 h-11 bg-[#2563eb] rounded-xl flex items-center justify-center text-white font-extrabold text-2xl shadow-sm">
+                H</div>
+        </div>
+
+        <!-- Getting Started -->
+        <div class="px-3 mb-5 mt-4">
+            <button
+                class="w-full py-3.5 bg-[#eff6ff] text-[#2563eb] hover:bg-blue-100 rounded-2xl flex flex-col items-center justify-center transition-colors border border-blue-100/50 shadow-sm">
+                <i class="fa-solid fa-rocket text-[17px] mb-1.5"></i>
+                <span class="text-[10px] font-bold text-center leading-tight">Quick<br>Start</span>
+            </button>
+        </div>
+
+        <!-- Nav Items -->
+        <nav class="flex-1 pb-4 overflow-y-auto scrollbar-hide flex flex-col items-center">
+
+            <a href="../index.html" class="sidebar-item">
+                <i class="fa-solid fa-gauge-high sidebar-icon"></i><span class="sidebar-label">Home</span>
+            </a>
+
+            <a href="#" class="sidebar-item">
+                <i class="fa-solid fa-bell-concierge sidebar-icon"></i><span
+                    class="sidebar-label">Front<br>Office</span>
+            </a>
+
+            <a href="#" class="sidebar-item">
+                <i class="fa-solid fa-user-plus sidebar-icon"></i><span class="sidebar-label">Admit</span>
+            </a>
+
+            <a href="#" class="sidebar-item">
+                <i class="fa-solid fa-graduation-cap sidebar-icon"></i><span class="sidebar-label">Student</span>
+            </a>
+
+            <a href="../index.html?module=academics" class="sidebar-item active"><i class="fa-solid fa-book-open sidebar-icon"></i><span class="sidebar-label">Academia</span></a>
+
+            <a href="#" class="sidebar-item">
+                <i class="fa-solid fa-file-pen sidebar-icon"></i><span class="sidebar-label">Exams</span>
+            </a>
+
+            <a href="#" class="sidebar-item">
+                <i class="fa-solid fa-users-gear sidebar-icon"></i><span class="sidebar-label">HR</span>
+            </a>
+
+            <a href="../finance/index.html" class="sidebar-item">
+                <i class="fa-solid fa-coins sidebar-icon"></i><span class="sidebar-label">Finance</span>
+            </a>
+        </nav>
+
+        <div class="mt-auto pb-6 pt-4 border-t border-slate-100 flex-shrink-0">
+            <a href="#" class="sidebar-item !py-2">
+                <i class="fa-solid fa-gear sidebar-icon"></i><span class="sidebar-label">Config</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden relative bg-white">
+        <!-- TOP HEADER -->
+        <header
+            class="h-16 flex items-center justify-between px-6 border-b border-gray-200 flex-shrink-0 bg-white z-10">
+            <div class="flex items-center gap-4">
+                <button @click="sidebarOpen = !sidebarOpen" class="text-slate-400 hover:text-slate-600"><i
+                        class="fa-solid fa-bars"></i></button>
+                <div class="flex items-center gap-2">
+                    
+                    <a href="../index.html?module=academics" class="flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition-colors mr-2 text-base tooltip" title="Back to Dashboard">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </a>
+                    <h1 class="text-lg font-bold text-slate-800">Academic Calendar</h1>
+                    <select
+                        class="ml-2 bg-gray-50 border border-gray-200 text-sm font-medium rounded-md px-2 py-1 outline-none text-gray-600">
+                        <option>2025-2026</option>
+                        <option>2024-2025</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Header Controls -->
+            <div class="flex items-center gap-4">
+                <button @click="goToday()"
+                    class="px-4 py-1.5 text-sm font-medium border border-gray-200 rounded-full hover:bg-gray-50 text-gray-700">Today</button>
+
+                <div class="flex items-center gap-4 px-2">
+                    <button @click="prev()"
+                        class="text-gray-400 hover:text-gray-700 w-6 h-6 flex items-center justify-center rounded-full hover:bg-gray-100"><i
+                            class="fa-solid fa-chevron-left text-xs"></i></button>
+                    <span class="text-base font-bold text-gray-800 w-44 text-center select-none"
+                        x-text="viewMode === 'year' ? currentYear : (viewMode === 'week' ? getWeekString() : getMonthYearString())"></span>
+                    <button @click="next()"
+                        class="text-gray-400 hover:text-gray-700 w-6 h-6 flex items-center justify-center rounded-full hover:bg-gray-100"><i
+                            class="fa-solid fa-chevron-right text-xs"></i></button>
+                </div>
+
+                <div class="flex bg-gray-100 rounded-lg p-1 text-sm font-medium">
+                    <button @click="viewMode = 'month'"
+                        :class="viewMode === 'month' ? 'bg-white shadow-sm text-gray-800' : 'text-gray-500 hover:text-gray-700'"
+                        class="px-3 py-1 rounded-md transition-all">Month</button>
+                    <button @click="viewMode = 'week'"
+                        :class="viewMode === 'week' ? 'bg-white shadow-sm text-gray-800' : 'text-gray-500 hover:text-gray-700'"
+                        class="px-3 py-1 rounded-md transition-all">Week</button>
+                    <button @click="viewMode = 'year'"
+                        :class="viewMode === 'year' ? 'bg-white shadow-sm text-gray-800' : 'text-gray-500 hover:text-gray-700'"
+                        class="px-3 py-1 rounded-md transition-all">Year</button>
+                </div>
+            </div>
+
+            <!-- Add Buttons -->
+            <div class="flex gap-2">
+                <button @click="openModal('holiday')"
+                    class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-600 border border-red-200 bg-red-50 rounded-full hover:bg-red-100 transition-colors"><i
+                        class="fa-solid fa-plus text-[10px]"></i> Holiday</button>
+                <button @click="openModal('event')"
+                    class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-600 border border-gray-200 bg-gray-50 rounded-full hover:bg-gray-100 transition-colors"><i
+                        class="fa-solid fa-plus text-[10px]"></i> Event</button>
+                <button @click="openModal('exam')"
+                    class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 rounded-full hover:bg-blue-700 shadow-sm transition-colors"><i
+                        class="fa-solid fa-plus text-[10px]"></i> Exam Period</button>
+            </div>
+        </header>
+
+        <!-- DASHBOARD AREA -->
+        <div class="flex flex-1 overflow-hidden bg-[#f8fafc]">
+
+            <!-- LEFT SETTINGS SIDEBAR -->
+            <div
+                class="w-64 max-w-[16rem] bg-white border-r border-gray-200 overflow-y-auto p-4 flex flex-col gap-4 flex-shrink-0">
+
+                <!-- Session Panel -->
+                <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Session</span>
+                        <button class="text-gray-400 hover:text-gray-600"><i
+                                class="fa-solid fa-pen text-xs"></i></button>
+                    </div>
+                    <div class="text-base font-bold text-gray-800 mb-4">2025-2026</div>
+                    <div class="grid grid-cols-2 gap-2 text-xs mb-4">
+                        <div>
+                            <div class="text-gray-400 uppercase font-semibold text-[9px] tracking-wider mb-1">Start
+                            </div>
+                            <div class="font-medium text-gray-700">Apr 1, 2025</div>
+                        </div>
+                        <div>
+                            <div class="text-gray-400 uppercase font-semibold text-[9px] tracking-wider mb-1">End</div>
+                            <div class="font-medium text-gray-700">Mar 31, 2026</div>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 text-center text-xs">
+                        <div class="flex-1 bg-emerald-50 text-emerald-700 rounded-lg py-2 border border-emerald-100">
+                            <div class="text-lg font-bold">306</div>
+                            <div class="text-[9px] uppercase tracking-wider mt-0.5 opacity-80 font-semibold">Working
+                                Days</div>
+                        </div>
+                        <div class="flex-1 bg-red-50 text-red-700 rounded-lg py-2 border border-red-100">
+                            <div class="text-lg font-bold">7</div>
+                            <div class="text-[9px] uppercase tracking-wider mt-0.5 opacity-80 font-semibold">Holidays
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upcoming Events Panel -->
+                <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <div
+                            class="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                            <i class="fa-solid fa-calendar-day"></i> Upcoming
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <template x-for="(event, index) in upcomingEvents" :key="index">
+                            <div class="flex items-start gap-3">
+                                <div class="w-10 h-10 rounded-lg flex flex-col items-center justify-center flex-shrink-0"
+                                    :class="getEventColorClass(event.type) + ' bg-opacity-20 border opacity-90'">
+                                    <span class="text-[9px] font-bold uppercase leading-none"
+                                        x-text="new Date(event.date).toLocaleString('default', { month: 'short' })"></span>
+                                    <span class="text-sm font-bold leading-none mt-1 text-gray-800"
+                                        x-text="new Date(event.date).getDate()"></span>
+                                </div>
+                                <div class="flex-1 overflow-hidden pt-0.5">
+                                    <div class="text-sm font-bold text-gray-800 truncate" x-text="event.title"></div>
+                                    <div class="text-[9px] font-bold uppercase tracking-wider mt-1"
+                                        :class="event.type === 'holiday' ? 'text-red-500' : (event.type === 'exam' ? 'text-amber-600' : 'text-purple-500')"
+                                        x-text="event.type"></div>
+                                </div>
+                            </div>
+                        </template>
+                        <div x-show="upcomingEvents.length === 0"
+                            class="text-xs text-gray-400 italic text-center py-4 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+                            No upcoming items</div>
+                    </div>
+                </div>
+
+                <!-- School Timing Panel -->
+                <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <div
+                            class="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                            <i class="fa-regular fa-clock"></i> School Timing
+                        </div>
+                        <button class="text-gray-400 hover:text-gray-600"><i
+                                class="fa-solid fa-pen text-xs"></i></button>
+                    </div>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between"><span class="text-gray-500 font-medium">Start Time</span>
+                            <span class="font-bold text-gray-800">8:00 AM</span>
+                        </div>
+                        <div class="flex justify-between"><span class="text-gray-500 font-medium">End Time</span>
+                            <span class="font-bold text-gray-800">2:00 PM</span>
+                        </div>
+                        <div class="flex justify-between"><span class="text-gray-500 font-medium">Assembly Time</span>
+                            <span class="font-bold text-gray-800">15 mins</span>
+                        </div>
+                        <div class="flex justify-between"><span class="text-gray-500 font-medium">Break Time</span>
+                            <span class="font-bold text-gray-800">20 mins</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Legend Panel -->
+                <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">Legend</div>
+                    <div class="space-y-2.5 text-xs font-medium text-gray-600">
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded-full border-2 border-red-400 box-border"></div> Holiday
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded-full border-2 border-amber-400 box-border"></div> Exam Period
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded-full border-2 border-purple-400 box-border"></div> Event
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded-full border-2 border-gray-400 box-border"></div> Break Period
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded-full border-2 border-blue-400 box-border"></div> Special Working
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- CALENDAR GRID BODY -->
+            <div class="flex-1 p-6 flex flex-col h-full bg-[#f8fafc] overflow-auto">
+                <!-- MONTH VIEW -->
+                <div x-show="viewMode === 'month'" class="flex-1 calendar-grid min-w-[800px] shadow-sm">
+                    <!-- Weekday Headers -->
+                    <div class="calendar-header-cell text-red-500">Sun</div>
+                    <div class="calendar-header-cell">Mon</div>
+                    <div class="calendar-header-cell">Tue</div>
+                    <div class="calendar-header-cell">Wed</div>
+                    <div class="calendar-header-cell">Thu</div>
+                    <div class="calendar-header-cell">Fri</div>
+                    <div class="calendar-header-cell">Sat</div>
+
+                    <!-- Calendar Cells -->
+                    <template x-for="dateObj in calendarDays" :key="dateObj.dateString">
+                        <div class="calendar-day-cell group" :class="{
+                                'is-other-month': !dateObj.isCurrentMonth,
+                                'is-today': dateObj.isToday
+                            }" @click="openModal('event', dateObj.dateString)">
+                            <span class="day-number"
+                                :class="{'text-red-500': dateObj.isSunday && !dateObj.isToday && dateObj.isCurrentMonth}"
+                                x-text="dateObj.day"></span>
+
+                            <!-- Events rendering logic -->
+                            <div class="flex flex-col gap-1 w-full flex-1 overflow-y-auto pr-1">
+                                <template x-for="event in getEventsForDate(dateObj.dateString)" :key="event.id">
+                                    <div class="event-bar" :class="getEventColorClass(event.type)" x-text="event.title"
+                                        @click.stop="editEvent(Math.random())" title="Click to view/edit"></div>
+                                </template>
+                            </div>
+
+                            <!-- Add Button Overlay -->
+                            <button @click.stop="openModal('event', dateObj.dateString)"
+                                class="add-btn absolute bottom-2 right-2 w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-colors shadow-sm">
+                                <i class="fa-solid fa-plus text-[10px]"></i>
+                            </button>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- WEEK VIEW -->
+                <div x-show="viewMode === 'week'" style="display: none;"
+                    class="flex-1 calendar-grid min-w-[800px] shadow-sm !grid-rows-[auto_1fr]">
+                    <!-- Weekday Headers -->
+                    <div class="calendar-header-cell text-red-500">Sun</div>
+                    <div class="calendar-header-cell">Mon</div>
+                    <div class="calendar-header-cell">Tue</div>
+                    <div class="calendar-header-cell">Wed</div>
+                    <div class="calendar-header-cell">Thu</div>
+                    <div class="calendar-header-cell">Fri</div>
+                    <div class="calendar-header-cell">Sat</div>
+
+                    <!-- Calendar Week Cells -->
+                    <template x-for="dateObj in calendarWeekDays" :key="dateObj.dateString">
+                        <div class="calendar-day-cell group" :class="{
+                                'is-today': dateObj.isToday
+                            }" @click="openModal('event', dateObj.dateString)">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="day-number" :class="{'text-red-500': dateObj.isSunday && !dateObj.isToday}"
+                                    x-text="dateObj.day"></span>
+                                <span class="text-xs text-gray-400 font-medium"
+                                    x-text="dateObj.date.toLocaleString('default', {month:'short'})"></span>
+                            </div>
+
+                            <!-- Events rendering logic -->
+                            <div class="flex flex-col gap-1 w-full flex-1 overflow-y-auto pr-1">
+                                <template x-for="event in getEventsForDate(dateObj.dateString)" :key="event.id">
+                                    <div class="event-bar" :class="getEventColorClass(event.type)" x-text="event.title"
+                                        @click.stop="editEvent(Math.random())" title="Click to view/edit"></div>
+                                </template>
+                            </div>
+
+                            <!-- Add Button Overlay -->
+                            <button @click.stop="openModal('event', dateObj.dateString)"
+                                class="add-btn absolute bottom-2 right-2 w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-colors shadow-sm">
+                                <i class="fa-solid fa-plus text-[10px]"></i>
+                            </button>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- YEAR VIEW -->
+                <div x-show="viewMode === 'year'" style="display: none;"
+                    class="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-6 text-sm">
+                    <template x-for="monthIdx in 12" :key="monthIdx">
+                        <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex flex-col h-64">
+                            <h3 class="font-bold text-gray-800 mb-3"
+                                x-text="new Date(currentYear, monthIdx - 1).toLocaleString('default', { month: 'long', year: 'numeric' })">
+                            </h3>
+                            <div class="space-y-2 flex-1 overflow-y-auto pr-1">
+                                <template
+                                    x-for="event in events.filter(e => new Date(e.date).getMonth() === (monthIdx - 1) && new Date(e.date).getFullYear() === currentYear)">
+                                    <div class="text-xs p-2 rounded border border-gray-100 flex gap-2"
+                                        :class="getEventColorClass(event.type) + ' bg-opacity-30 border-opacity-50'">
+                                        <div class="font-semibold w-6 text-center"
+                                            x-text="new Date(event.date).getDate()"></div>
+                                        <div class="truncate text-gray-700 font-medium" x-text="event.title"></div>
+                                    </div>
+                                </template>
+                                <div x-show="events.filter(e => new Date(e.date).getMonth() === (monthIdx - 1) && new Date(e.date).getFullYear() === currentYear).length === 0"
+                                    class="text-xs text-gray-400 italic py-2 text-center">No events this month</div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ADD EVENT MODAL -->
+        <div x-show="showModal" x-cloak
+            class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm transition-opacity">
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all"
+                @click.away="showModal=false">
+                <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-gray-50/80">
+                    <h3 class="font-bold text-slate-800 text-lg">Add to Calendar</h3>
+                    <button @click="showModal=false"
+                        class="w-8 h-8 rounded-full bg-white text-slate-400 hover:text-slate-600 hover:bg-gray-200 flex items-center justify-center transition-colors shadow-sm"><i
+                            class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="p-6 space-y-5">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Start
+                                Date</label>
+                            <input type="date" x-model="newEvent.startDate"
+                                class="w-full border border-slate-200 rounded-xl p-3 text-sm text-gray-700 font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all shadow-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">End
+                                Date</label>
+                            <input type="date" x-model="newEvent.endDate"
+                                class="w-full border border-slate-200 rounded-xl p-3 text-sm text-gray-700 font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all shadow-sm">
+                        </div>
+                    </div>
+                    <div>
+                        <label
+                            class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Title</label>
+                        <input type="text" x-model="newEvent.title"
+                            class="w-full border border-slate-200 rounded-xl p-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all shadow-sm"
+                            placeholder="E.g., Final Physics Exam" @keydown.enter="saveEvent()">
+                    </div>
+                    <div>
+                        <label
+                            class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Type</label>
+                        <div class="grid grid-cols-3 gap-3">
+                            <button @click="newEvent.type = 'event'"
+                                :class="newEvent.type === 'event' ? 'bg-purple-50 border-purple-500 text-purple-700 ring-2 ring-purple-200' : 'border-slate-200 text-gray-600 hover:bg-gray-50'"
+                                class="border rounded-xl py-3 text-sm font-semibold transition-all shadow-sm cursor-pointer">Event</button>
+                            <button @click="newEvent.type = 'holiday'"
+                                :class="newEvent.type === 'holiday' ? 'bg-red-50 border-red-500 text-red-700 ring-2 ring-red-200' : 'border-slate-200 text-gray-600 hover:bg-gray-50'"
+                                class="border rounded-xl py-3 text-sm font-semibold transition-all shadow-sm cursor-pointer">Holiday</button>
+                            <button @click="newEvent.type = 'exam'"
+                                :class="newEvent.type === 'exam' ? 'bg-amber-50 border-amber-500 text-amber-700 ring-2 ring-amber-200' : 'border-slate-200 text-gray-600 hover:bg-gray-50'"
+                                class="border rounded-xl py-3 text-sm font-semibold transition-all shadow-sm cursor-pointer">Exam</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-6 py-4 bg-gray-50 border-t border-slate-100 flex justify-end gap-3 rounded-b-2xl">
+                    <button @click="showModal=false"
+                        class="px-5 py-2.5 text-sm text-slate-600 font-bold hover:bg-gray-200 rounded-xl transition-colors">Cancel</button>
+                    <button @click="saveEvent()"
+                        class="px-5 py-2.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-md shadow-blue-200 transition-all transform active:scale-95 flex items-center gap-2">
+                        <i class="fa-solid fa-check"></i> Save Entry
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('calendarApp', () => ({
+                sidebarOpen: true,
+                expandedMenu: 'academics',
+                viewMode: 'month',
+
+                currentMonth: 1, // Feb (0-indexed)
+                currentYear: 2026,
+                currentDate: new Date(2026, 1, 1),
+
+                showModal: false,
+                newEvent: { startDate: '', endDate: '', title: '', type: 'event' },
+
+                events: [
+                    { id: 1, date: '2026-02-01', title: 'Final Exams', type: 'exam' },
+                    { id: 2, date: '2026-02-02', title: 'Final Exams', type: 'exam' },
+                    { id: 3, date: '2026-02-03', title: 'Final Exams', type: 'exam' },
+                    { id: 4, date: '2026-02-04', title: 'Final Exams', type: 'exam' },
+                    { id: 5, date: '2026-02-05', title: 'Final Exams', type: 'exam' },
+                    { id: 6, date: '2026-02-06', title: 'Final Exams', type: 'exam' },
+                    { id: 7, date: '2026-02-07', title: 'Final Exams', type: 'exam' },
+                    { id: 8, date: '2026-02-08', title: 'Final Exams', type: 'exam' },
+                    { id: 9, date: '2026-02-09', title: 'Final Exams', type: 'exam' },
+                    { id: 10, date: '2026-02-10', title: 'Final Exams', type: 'exam' },
+                    { id: 11, date: '2026-02-11', title: 'Final Exams', type: 'exam' },
+                    { id: 12, date: '2026-02-12', title: 'Final Exams', type: 'exam' },
+                    { id: 13, date: '2026-02-13', title: 'Final Exams', type: 'exam' },
+                    { id: 14, date: '2026-02-14', title: 'Final Exams', type: 'exam' },
+                    { id: 15, date: '2026-02-15', title: 'Final Exams', type: 'exam' },
+                    { id: 16, date: '2026-02-20', title: 'Annual Day', type: 'event' },
+                    { id: 17, date: '2026-02-21', title: 'Annual Day', type: 'event' }
+                ],
+
+                get upcomingEvents() {
+                    let today = new Date();
+                    today.setHours(0, 0, 0, 0);
+
+                    let uniqueEvents = [];
+                    let seen = new Set();
+
+                    let sorted = [...this.events].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                    for (let e of sorted) {
+                        if (new Date(e.date) >= today) {
+                            let key = e.title;
+                            // avoid duplicate events belonging to the same multi-day occurrence
+                            if (!seen.has(key)) {
+                                seen.add(key);
+                                uniqueEvents.push(e);
+                            }
+                        }
+                    }
+                    return uniqueEvents.slice(0, 5); // display up to 5 upcoming items
+                },
+
+                get calendarDays() {
+                    let firstDayOfMonth = new Date(this.currentYear, this.currentMonth, 1);
+                    let lastDayOfMonth = new Date(this.currentYear, this.currentMonth + 1, 0);
+
+                    let days = [];
+                    let firstDayOfWeek = firstDayOfMonth.getDay();
+
+                    let prevMonthDays = new Date(this.currentYear, this.currentMonth, 0).getDate();
+                    for (let i = firstDayOfWeek - 1; i >= 0; i--) {
+                        let d = new Date(this.currentYear, this.currentMonth - 1, prevMonthDays - i);
+                        days.push(this.createDayObject(d, false));
+                    }
+
+                    for (let i = 1; i <= lastDayOfMonth.getDate(); i++) {
+                        let d = new Date(this.currentYear, this.currentMonth, i);
+                        days.push(this.createDayObject(d, true));
+                    }
+
+                    let remainingCells = 42 - days.length;
+                    for (let i = 1; i <= remainingCells; i++) {
+                        let d = new Date(this.currentYear, this.currentMonth + 1, i);
+                        days.push(this.createDayObject(d, false));
+                    }
+
+                    return days;
+                },
+
+                get calendarWeekDays() {
+                    let days = [];
+                    let curr = new Date(this.currentDate);
+                    let first = curr.getDate() - curr.getDay(); // Sunday
+                    let firstDay = new Date(curr.setDate(first));
+
+                    for (let i = 0; i < 7; i++) {
+                        let d = new Date(firstDay);
+                        d.setDate(firstDay.getDate() + i);
+                        days.push(this.createDayObject(d, d.getMonth() === this.currentMonth));
+                    }
+                    return days;
+                },
+
+                getWeekString() {
+                    let days = this.calendarWeekDays;
+                    let start = days[0].date;
+                    let end = days[6].date;
+                    let startMonth = start.toLocaleString('default', { month: 'short' });
+                    let endMonth = end.toLocaleString('default', { month: 'short' });
+                    if (startMonth === endMonth) {
+                        return `${startMonth} ${start.getDate()} - ${end.getDate()}, ${end.getFullYear()}`;
+                    } else {
+                        return `${startMonth} ${start.getDate()} - ${endMonth} ${end.getDate()}, ${end.getFullYear()}`;
+                    }
+                },
+
+                createDayObject(date, isCurrentMonth) {
+                    let dateString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                    let todayString = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}`;
+
+                    return {
+                        date: date,
+                        dateString: dateString,
+                        day: date.getDate(),
+                        isCurrentMonth: isCurrentMonth,
+                        isToday: dateString === todayString,
+                        isSunday: date.getDay() === 0
+                    };
+                },
+
+                getMonthYearString() {
+                    return new Date(this.currentYear, this.currentMonth).toLocaleString('default', { month: 'long', year: 'numeric' });
+                },
+
+                prev() {
+                    if (this.viewMode === 'month') {
+                        if (this.currentMonth === 0) {
+                            this.currentMonth = 11;
+                            this.currentYear--;
+                        } else {
+                            this.currentMonth--;
+                        }
+                        this.currentDate = new Date(this.currentYear, this.currentMonth, 1);
+                    } else if (this.viewMode === 'week') {
+                        this.currentDate.setDate(this.currentDate.getDate() - 7);
+                        this.currentMonth = this.currentDate.getMonth();
+                        this.currentYear = this.currentDate.getFullYear();
+                    } else if (this.viewMode === 'year') {
+                        this.currentYear--;
+                        this.currentDate.setFullYear(this.currentYear);
+                    }
+                },
+
+                next() {
+                    if (this.viewMode === 'month') {
+                        if (this.currentMonth === 11) {
+                            this.currentMonth = 0;
+                            this.currentYear++;
+                        } else {
+                            this.currentMonth++;
+                        }
+                        this.currentDate = new Date(this.currentYear, this.currentMonth, 1);
+                    } else if (this.viewMode === 'week') {
+                        this.currentDate.setDate(this.currentDate.getDate() + 7);
+                        this.currentMonth = this.currentDate.getMonth();
+                        this.currentYear = this.currentDate.getFullYear();
+                    } else if (this.viewMode === 'year') {
+                        this.currentYear++;
+                        this.currentDate.setFullYear(this.currentYear);
+                    }
+                },
+
+                goToday() {
+                    const today = new Date();
+                    this.currentDate = today;
+                    this.currentMonth = today.getMonth();
+                    this.currentYear = today.getFullYear();
+                },
+
+                getEventsForDate(dateString) {
+                    return this.events.filter(e => e.date === dateString);
+                },
+
+                getEventColorClass(type) {
+                    if (type === 'holiday') return 'event-holiday';
+                    if (type === 'exam') return 'event-exam';
+                    return 'event-event';
+                },
+
+                openModal(type = 'event', date = null) {
+                    const d = date || `${this.currentYear}-${String(this.currentMonth + 1).padStart(2, '0')}-01`;
+                    this.newEvent = { startDate: d, endDate: d, title: '', type: type };
+                    this.showModal = true;
+                    // Auto focus would go here if needed
+                },
+
+                editEvent() {
+                    // Logic to edit event can be added here
+                },
+
+                saveEvent() {
+                    if (this.newEvent.title && this.newEvent.startDate) {
+                        let current = new Date(this.newEvent.startDate);
+                        let end = new Date(this.newEvent.endDate || this.newEvent.startDate);
+
+                        while (current <= end) {
+                            let dateString = `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, '0')}-${String(current.getDate()).padStart(2, '0')}`;
+                            this.events.push({
+                                id: Date.now() + Math.random(),
+                                date: dateString,
+                                title: this.newEvent.title,
+                                type: this.newEvent.type
+                            });
+                            // Fix by using setDate properly without infinite looping on timezone mismatches
+                            current = new Date(current.getTime() + 86400000);
+                        }
+
+                        this.showModal = false;
+                        this.newEvent.title = '';
+                    }
+                }
+            }));
+        });
+    </script>
+</body>
+
+</html>
+
